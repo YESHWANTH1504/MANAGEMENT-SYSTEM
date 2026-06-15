@@ -1,14 +1,15 @@
 {
   "short_name": "MCC IMMS",
   "name": "MCC MRF Innovation Park Management System",
+  "description": "Madras Christian College MRF Innovation Park Management System for interns and employees.",
   "icons": [
     {
-      "src": "/logo.png",
+      "src": "/icon-192.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "/logo.png",
+      "src": "/icon-512.png",
       "type": "image/png",
       "sizes": "512x512"
     }
