@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext';
 import { 
   Search, User, MapPin, Mail, Phone, Calendar, BookOpen, 
   Briefcase, Code, PlusCircle, CheckCircle2, AlertTriangle, Send,
-  FileText, Image as ImageIcon, Video, Music, Paperclip, ArrowLeft, Sparkles, RefreshCw, AlertCircle, Clock
+  FileText, Image as ImageIcon, Video, Music, Paperclip, ArrowLeft, Sparkles, RefreshCw, AlertCircle, Clock, Camera, X
 } from 'lucide-react';
 import AttendanceCalendar from '../components/AttendanceCalendar';
 import { 
@@ -15,9 +16,11 @@ import {
 
 const InternProfiles = () => {
   const { showToast } = useToast();
+  const { user } = useAuth();
   const [interns, setInterns] = useState([]);
   const [selectedIntern, setSelectedIntern] = useState(null);
   const [searchText, setSearchText] = useState('');
+  const [sortBy, setSortBy] = useState('name');
   const [loading, setLoading] = useState(true);
   const [reports, setReports] = useState([]);
   const [reportsLoading, setReportsLoading] = useState(false);
@@ -28,6 +31,7 @@ const InternProfiles = () => {
   const [activeTab, setActiveTab] = useState('attendance');
   const [weeklySummary, setWeeklySummary] = useState(null);
   const [weeklySummaryLoading, setWeeklySummaryLoading] = useState(false);
+  const [previewPhoto, setPreviewPhoto] = useState(null);
 
   // Form state
   const [reportForm, setReportForm] = useState({
@@ -108,6 +112,65 @@ const InternProfiles = () => {
     fetchInterns();
   }, []);
 
+  const getProfilePhotoUrl = (photoName) => {
+    if (!photoName) return '';
+    if (photoName.startsWith('http://') || photoName.startsWith('https://')) return photoName;
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+    const BASE_URL = API_URL.replace('/api/v1', '');
+    return `${BASE_URL}/static/uploads/${photoName}`;
+  };
+
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+      showToast('Please upload an image (JPG, PNG, WEBP, or GIF)', 'error');
+      return;
+    }
+    
+    const formData = new FormData();
+    formData.append('user_id', selectedIntern.user_id);
+    formData.append('file', file);
+    
+    try {
+      const res = await api.post('/media/upload-avatar', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      const newPhoto = res.data.profile_photo;
+      setSelectedIntern(prev => ({ ...prev, profile_photo: newPhoto }));
+      setInterns(prev => prev.map(i => i.id === selectedIntern.id ? { ...i, profile_photo: newPhoto } : i));
+      showToast('Profile photo updated successfully!', 'success');
+    } catch (err) {
+      showToast(err.response?.data?.detail || 'Failed to upload profile photo.', 'error');
+    }
+  };
+
+  const handleGenerateReport = async () => {
+    try {
+      showToast('Generating report...', 'info');
+      const response = await api.get(`/reports/user/${selectedIntern.user_id}/download-pdf`, {
+        responseType: 'blob'
+      });
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Accomplishment_Report_${selectedIntern.full_name.replace(/\s+/g, '_')}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      showToast('Report downloaded successfully!', 'success');
+    } catch (err) {
+      console.error(err);
+      showToast('Failed to generate report.', 'error');
+    }
+  };
+
   useEffect(() => {
     if (selectedIntern) {
       fetchReports(selectedIntern.user_id);
@@ -187,12 +250,28 @@ const InternProfiles = () => {
     }
   };
 
-  const filteredInterns = interns.filter(intern => 
-    intern.full_name.toLowerCase().includes(searchText.toLowerCase()) ||
-    (intern.internship_domain && intern.internship_domain.toLowerCase().includes(searchText.toLowerCase())) ||
-    (intern.college_name && intern.college_name.toLowerCase().includes(searchText.toLowerCase())) ||
-    (intern.internship_id && intern.internship_id.toLowerCase().includes(searchText.toLowerCase()))
-  );
+  // Filtered and sorted interns list
+  const sortedInterns = [...interns]
+    .filter(intern => 
+      intern.full_name.toLowerCase().includes(searchText.toLowerCase()) ||
+      (intern.internship_domain && intern.internship_domain.toLowerCase().includes(searchText.toLowerCase())) ||
+      (intern.college_name && intern.college_name.toLowerCase().includes(searchText.toLowerCase())) ||
+      (intern.internship_id && intern.internship_id.toLowerCase().includes(searchText.toLowerCase()))
+    )
+    .sort((a, b) => {
+      if (sortBy === 'name') {
+        return a.full_name.localeCompare(b.full_name);
+      } else if (sortBy === 'id') {
+        return a.internship_id.localeCompare(b.internship_id);
+      } else if (sortBy === 'domain') {
+        return (a.internship_domain || '').localeCompare(b.internship_domain || '');
+      } else if (sortBy === 'college') {
+        return (a.college_name || '').localeCompare(b.college_name || '');
+      } else if (sortBy === 'date') {
+        return (a.start_date || '').localeCompare(b.start_date || '');
+      }
+      return 0;
+    });
 
   // --- SCREEN 1: LIST DIRECTORY VIEW ---
   if (!selectedIntern) {
@@ -204,17 +283,30 @@ const InternProfiles = () => {
             <h3 className="font-extrabold text-slate-800 dark:text-white text-base">Interns Directory</h3>
             <p className="text-[10px] text-slate-500 mt-0.5">Explore active interns and manage their portfolios and daily logs.</p>
           </div>
-          <div className="relative md:w-80">
-            <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 pointer-events-none">
-              <Search size={16} />
-            </span>
-            <input
-              type="text"
-              placeholder="Search by name, domain, ID or college..."
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              className="w-full text-xs pl-10 pr-4 py-2.5 bg-white/50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-brand-500 dark:text-white"
-            />
+          <div className="flex items-center space-x-2.5">
+            <div className="relative md:w-80">
+              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 pointer-events-none">
+                <Search size={16} />
+              </span>
+              <input
+                type="text"
+                placeholder="Search by name, domain, ID or college..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="w-full text-xs pl-10 pr-4 py-2.5 bg-white/50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-brand-500 dark:text-white"
+              />
+            </div>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="text-xs px-3 py-2.5 bg-white/50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-brand-500 dark:text-white"
+            >
+              <option value="name">Sort by Name</option>
+              <option value="id">Sort by ID</option>
+              <option value="domain">Sort by Domain</option>
+              <option value="college">Sort by College</option>
+              <option value="date">Sort by Date</option>
+            </select>
           </div>
         </div>
 
@@ -240,17 +332,32 @@ const InternProfiles = () => {
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500 mx-auto"></div>
                     </td>
                   </tr>
-                ) : filteredInterns.length === 0 ? (
+                ) : sortedInterns.length === 0 ? (
                   <tr>
                     <td colSpan="7" className="text-center py-12 text-slate-500">No intern records found.</td>
                   </tr>
                 ) : (
-                  filteredInterns.map((intern) => (
+                  sortedInterns.map((intern) => (
                     <tr key={intern.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20">
                       <td className="px-6 py-4 font-mono font-bold text-purple-600 dark:text-purple-400">{intern.internship_id}</td>
                       <td className="px-6 py-4">
-                        <p className="font-bold text-slate-800 dark:text-white">{intern.full_name}</p>
-                        <p className="text-[10px] text-slate-500 mt-0.5">{intern.mobile_number || 'No phone'}</p>
+                        <div className="flex items-center space-x-3">
+                          {intern.profile_photo ? (
+                            <img 
+                              src={getProfilePhotoUrl(intern.profile_photo)} 
+                              alt={intern.full_name} 
+                              className="w-9 h-9 rounded-xl object-cover border border-slate-200 dark:border-slate-800 shadow-sm"
+                            />
+                          ) : (
+                            <div className="w-9 h-9 rounded-xl bg-purple-500/10 dark:bg-purple-550/15 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-sm border border-purple-500/20">
+                              {intern.full_name[0].toUpperCase()}
+                            </div>
+                          )}
+                          <div>
+                            <p className="font-bold text-slate-800 dark:text-white">{intern.full_name}</p>
+                            <p className="text-[10px] text-slate-500 mt-0.5">{intern.mobile_number || 'No phone'}</p>
+                          </div>
+                        </div>
                       </td>
                       <td className="px-6 py-4">
                         <p className="font-semibold text-slate-850 dark:text-white">{intern.internship_domain}</p>
@@ -264,7 +371,11 @@ const InternProfiles = () => {
                         <p className="text-[10px] text-slate-500 mt-0.5">to {intern.end_date ? new Date(intern.end_date).toLocaleDateString() : 'N/A'}</p>
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <span className="inline-block bg-purple-500/10 text-purple-700 dark:text-purple-300 text-[9px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full">
+                        <span className={`inline-block text-[9px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full ${
+                          (intern.internship_status || '').toLowerCase() === 'active'
+                            ? 'status-badge-active'
+                            : 'status-badge-inactive'
+                        }`}>
                           {intern.internship_status}
                         </span>
                       </td>
@@ -294,27 +405,65 @@ const InternProfiles = () => {
       <div className="flex items-center justify-between">
         <button
           onClick={() => setSelectedIntern(null)}
-          className="flex items-center space-x-2 text-xs font-bold text-slate-650 hover:text-slate-800 dark:text-slate-350 dark:hover:text-white bg-white/70 dark:bg-slate-900 border border-slate-205 dark:border-slate-805 px-4 py-2.5 rounded-xl shadow-sm transition-all hover:scale-105 active:scale-95"
+          className="flex items-center space-x-2 text-xs font-bold text-slate-650 hover:text-slate-800 dark:text-slate-350 dark:hover:text-white bg-white/70 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-4 py-2.5 rounded-xl shadow-sm transition-all hover:scale-105 active:scale-95"
         >
           <ArrowLeft size={14} />
           <span>Back to Interns Directory</span>
         </button>
+
+        <button
+          onClick={handleGenerateReport}
+          className="flex items-center space-x-2 text-xs font-bold bg-brand-600 hover:bg-brand-500 text-white px-4 py-2.5 rounded-xl shadow-md transition-all active:translate-y-[0.5px] hover:scale-105 active:scale-95"
+        >
+          <FileText size={14} />
+          <span>Generate Report</span>
+        </button>
       </div>
 
       {/* Identity Banner */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-brand-700 to-slate-800 dark:from-brand-950 dark:to-slate-900 text-white rounded-2xl p-6 shadow-xl">
-        <div className="relative z-10 flex items-center space-x-4">
-          <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center font-extrabold text-2xl border border-white/20 text-white shadow-lg">
-            {selectedIntern.full_name[0].toUpperCase()}
-          </div>
-          <div>
+      <div className="relative overflow-hidden welcome-hero-banner bg-brand-600 dark:bg-brand-900 text-white rounded-3xl p-6 shadow-xl">
+        <div className="relative z-10 flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-6">
+          <div className="text-center sm:text-left">
             <h2 className="text-lg md:text-xl font-black">{selectedIntern.full_name}</h2>
             <p className="text-xs text-purple-100 font-semibold mt-1">
               {selectedIntern.internship_domain} • ID: <span className="font-mono text-yellow-300">{selectedIntern.internship_id}</span>
             </p>
-            <span className="inline-block bg-white/20 text-[9px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full mt-2">
+            <span className={`inline-block text-[9px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full mt-2 ${
+              (selectedIntern.internship_status || '').toLowerCase() === 'active'
+                ? 'status-badge-active'
+                : 'status-badge-inactive'
+            }`}>
               {selectedIntern.internship_status}
             </span>
+          </div>
+          <div className="relative group w-28 h-36 shrink-0 mx-auto sm:mx-0">
+            {selectedIntern.profile_photo ? (
+              <img 
+                src={getProfilePhotoUrl(selectedIntern.profile_photo)} 
+                alt={selectedIntern.full_name} 
+                onClick={() => setPreviewPhoto(getProfilePhotoUrl(selectedIntern.profile_photo))}
+                className="w-28 h-36 rounded-2xl object-cover border-2 border-white/25 shadow-lg cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-transform"
+                onError={(e) => { e.target.src = ''; }}
+              />
+            ) : (
+              <div className="w-28 h-36 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center font-extrabold text-3xl border-2 border-white/25 text-white shadow-lg">
+                {selectedIntern.full_name[0].toUpperCase()}
+              </div>
+            )}
+            
+            {/* Show edit/upload overlay if user is admin or viewing own profile */}
+            {user && (user.role === 'admin' || user.id === selectedIntern.user_id) && (
+              <label className="absolute inset-0 bg-black/60 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer text-white text-[10px] font-bold">
+                <Camera size={18} className="mb-1" />
+                <span>Change Photo</span>
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={handleAvatarChange} 
+                  className="hidden" 
+                />
+              </label>
+            )}
           </div>
         </div>
       </div>
@@ -331,10 +480,6 @@ const InternProfiles = () => {
             <div className="flex justify-between items-center py-1 border-b border-slate-100/50 dark:border-slate-800/50">
               <span className="text-slate-700 dark:text-slate-200 font-semibold">College Name</span>
               <span className="font-extrabold text-slate-900 dark:text-white max-w-[180px] truncate text-right">{selectedIntern.college_name || 'N/A'}</span>
-            </div>
-            <div className="flex justify-between items-center py-1 border-b border-slate-100/50 dark:border-slate-800/50">
-              <span className="text-slate-700 dark:text-slate-200 font-semibold">University</span>
-              <span className="font-extrabold text-slate-900 dark:text-white max-w-[180px] truncate text-right">{selectedIntern.university_name || 'N/A'}</span>
             </div>
             <div className="flex justify-between items-center py-1 border-b border-slate-100/50 dark:border-slate-800/50">
               <span className="text-slate-700 dark:text-slate-200 font-semibold">Degree & Dept</span>
@@ -463,20 +608,20 @@ const InternProfiles = () => {
                   <div className="md:col-span-2 space-y-3.5">
                     <div>
                       <span className="text-[10px] uppercase font-bold text-slate-450 block mb-1">Key Achievements & Progress</span>
-                      <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed bg-slate-50/50 dark:bg-slate-950/20 border border-slate-205 dark:border-slate-805/50 p-4 rounded-xl">
+                      <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed bg-slate-50/50 dark:bg-slate-950/20 border border-slate-200 dark:border-slate-800/50 p-4 rounded-xl">
                         {weeklySummary.summary_text}
                       </p>
                     </div>
                     <div>
                       <span className="text-[10px] uppercase font-bold text-slate-450 block mb-1">Weekly Blockers / Technical Challenges</span>
-                      <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed bg-slate-50/50 dark:bg-slate-950/20 border border-slate-205 dark:border-slate-805/50 p-4 rounded-xl">
+                      <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed bg-slate-50/50 dark:bg-slate-950/20 border border-slate-200 dark:border-slate-800/50 p-4 rounded-xl">
                         {weeklySummary.blockers || "None reported."}
                       </p>
                     </div>
                   </div>
 
                   {/* Summary Sidebar Status Indicators */}
-                  <div className="space-y-4 bg-slate-50/50 dark:bg-slate-950/20 border border-slate-205/50 dark:border-slate-805/50 p-4 rounded-2xl h-fit">
+                  <div className="space-y-4 bg-slate-50/50 dark:bg-slate-950/20 border border-slate-200/50 dark:border-slate-800/50 p-4 rounded-2xl h-fit">
                     <div className="pb-3.5 border-b border-slate-200/50 dark:border-slate-850/50 flex justify-between items-center">
                       <div>
                         <span className="text-[9px] uppercase font-bold text-slate-450 block">Sentiment Analysis</span>
@@ -700,6 +845,30 @@ const InternProfiles = () => {
                 })()}
               </div>
             </div>
+          </div>
+        </div>
+      )}
+      {/* Photo Preview Modal Lightbox */}
+      {previewPhoto && (
+        <div 
+          onClick={() => setPreviewPhoto(null)}
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-md cursor-zoom-out p-4 page-fade-in"
+        >
+          <div 
+            className="relative max-w-2xl w-full bg-white/5 border border-white/10 p-2 rounded-3xl pop-bounce shadow-2xl overflow-hidden" 
+            onClick={e => e.stopPropagation()}
+          >
+            <button 
+              onClick={() => setPreviewPhoto(null)}
+              className="absolute top-4 right-4 z-50 p-2 rounded-full bg-black/60 hover:bg-black/80 text-white transition-all shadow-md"
+            >
+              <X size={18} />
+            </button>
+            <img 
+              src={previewPhoto} 
+              alt="Profile Full Preview" 
+              className="w-full h-auto max-h-[80vh] object-contain rounded-2xl bg-slate-950 p-2"
+            />
           </div>
         </div>
       )}

@@ -61,7 +61,7 @@ def create_intern(
         project_description=data.project_description,
         start_date=data.start_date,
         end_date=data.end_date,
-        internship_status=data.internship_status,
+        internship_status=data.internship_status or "active",
         programming_languages=data.programming_languages,
         frameworks=data.frameworks,
         tools_used=data.tools_used,
@@ -182,6 +182,8 @@ def update_intern(
 
     # Apply updates
     for key, value in update_data.items():
+        if key == "internship_status" and not value:
+            continue
         setattr(intern, key, value)
         
     db.commit()

@@ -112,13 +112,15 @@ const AdminDashboard = () => {
         id: i.user_id,
         name: i.full_name,
         role: 'intern',
-        identifier: i.internship_id
+        identifier: i.internship_id,
+        profile_photo: i.profile_photo || null
       }));
       const employeesList = employeesRes.data.map(e => ({
         id: e.user_id,
         name: e.full_name,
         role: 'employee',
-        identifier: e.employee_id
+        identifier: e.employee_id,
+        profile_photo: e.profile_photo || null
       }));
       setProfiles([...internsList, ...employeesList]);
     } catch (err) {
@@ -335,7 +337,7 @@ const AdminDashboard = () => {
       )}
 
       {/* Welcome Hero Banner */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-brand-700 to-slate-800 dark:from-brand-950 dark:to-slate-900 text-white rounded-xl p-6 md:p-8 shadow-sm">
+      <div className="relative overflow-hidden welcome-hero-banner bg-brand-600 dark:bg-brand-900 text-white rounded-3xl p-6 md:p-8 shadow-sm">
         <div className="absolute right-0 bottom-0 top-0 w-1/3 opacity-15 pointer-events-none hidden md:block">
           <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M0 100 C 20 80, 40 80, 60 100 C 80 120, 100 100, 100 100 L 100 0 L 0 0 Z" fill="white"/>
@@ -505,11 +507,33 @@ const AdminDashboard = () => {
               <p className="text-[10px] text-slate-505 dark:text-slate-400 mt-0.5">Mark daily check-in / check-out logs for interns & employees</p>
             </div>
           </div>
-          {selectedProfileId && (
-            <div className="text-[10px] font-bold px-3 py-1 bg-brand-500/10 text-brand-500 rounded-full">
-              ID Selected: {selectedProfileId}
-            </div>
-          )}
+          {selectedProfileId && (() => {
+            const selProfile = profiles.find(p => p.id.toString() === selectedProfileId.toString());
+            return selProfile ? (
+              <div className="flex items-center space-x-2">
+                {selProfile.profile_photo ? (
+                  <img
+                    src={(() => {
+                      const photo = selProfile.profile_photo;
+                      if (!photo) return '';
+                      if (photo.startsWith('http://') || photo.startsWith('https://')) return photo;
+                      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+                      return `${API_URL.replace('/api/v1', '')}/static/uploads/${photo}`;
+                    })()}
+                    alt={selProfile.name}
+                    className="w-8 h-8 rounded-xl object-cover border border-brand-500/30 shadow-sm"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-xl bg-brand-500/10 text-brand-500 flex items-center justify-center font-bold text-sm">
+                    {selProfile.name[0].toUpperCase()}
+                  </div>
+                )}
+                <div className="text-[10px] font-bold px-3 py-1 bg-brand-500/10 text-brand-500 rounded-full">
+                  {selProfile.name} ({selProfile.role.toUpperCase()})
+                </div>
+              </div>
+            ) : null;
+          })()}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
@@ -575,7 +599,7 @@ const AdminDashboard = () => {
                       <button
                         onClick={handleCheckInSelected}
                         disabled={checkingInOut}
-                        className="px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 disabled:opacity-50 text-xs font-bold text-white rounded-xl shadow-md active:translate-y-[1px] transition-all flex items-center space-x-1"
+                        className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-xs font-bold text-white rounded-full shadow-md active:translate-y-[1px] transition-all flex items-center space-x-1"
                       >
                         <CheckCircle size={14} />
                         <span>Check In</span>
@@ -584,13 +608,13 @@ const AdminDashboard = () => {
                       <button
                         onClick={handleCheckOutSelected}
                         disabled={checkingInOut}
-                        className="px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-500 hover:from-indigo-500 hover:to-violet-400 disabled:opacity-50 text-xs font-bold text-white rounded-xl shadow-md active:translate-y-[1px] transition-all flex items-center space-x-1"
+                        className="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-xs font-bold text-white rounded-full shadow-md active:translate-y-[1px] transition-all flex items-center space-x-1"
                       >
                         <XCircle size={14} />
                         <span>Check Out</span>
                       </button>
                     ) : (
-                      <div className="flex items-center space-x-1.5 text-emerald-500 text-xs font-bold bg-emerald-500/10 px-3.5 py-2 rounded-xl">
+                      <div className="flex items-center space-x-1.5 text-emerald-500 text-xs font-bold bg-emerald-500/10 px-3.5 py-2 rounded-full">
                         <CheckCircle2 size={16} />
                         <span>Checked out for today</span>
                       </div>
@@ -894,21 +918,21 @@ const AdminDashboard = () => {
                           <div className="flex space-x-2 w-full md:w-auto shrink-0">
                             <button
                               onClick={() => handleOpenChat(card.ref_id)}
-                              className="flex-1 md:flex-none text-xs px-4 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-750 dark:text-slate-205 font-bold rounded-xl active:translate-y-[1px] transition-all flex items-center justify-center space-x-1"
+                              className="flex-1 md:flex-none text-xs px-4 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-750 dark:text-slate-200 font-bold rounded-full active:translate-y-[1px] transition-all flex items-center justify-center space-x-1"
                             >
                               <MessageSquare size={14} className="text-brand-500" />
                               <span>Discussion Chat</span>
                             </button>
                             <button
                               onClick={() => handleReviewReport(card.ref_id, 'approved')}
-                              className="flex-1 md:flex-none text-xs px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow shadow-emerald-600/10 active:translate-y-[1px] transition-all flex items-center justify-center space-x-1"
+                              className="flex-1 md:flex-none text-xs px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-full shadow shadow-emerald-600/10 active:translate-y-[1px] transition-all flex items-center justify-center space-x-1"
                             >
                               <CheckCircle size={14} />
                               <span>Approve</span>
                             </button>
                             <button
                               onClick={() => handleReviewReport(card.ref_id, 'rejected')}
-                              className="flex-1 md:flex-none text-xs px-4 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl shadow shadow-red-600/10 active:translate-y-[1px] transition-all flex items-center justify-center space-x-1"
+                              className="flex-1 md:flex-none text-xs px-4 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-full shadow shadow-red-600/10 active:translate-y-[1px] transition-all flex items-center justify-center space-x-1"
                             >
                               <XCircle size={14} />
                               <span>Reject</span>

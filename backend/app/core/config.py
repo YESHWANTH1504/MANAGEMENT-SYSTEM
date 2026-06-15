@@ -29,6 +29,16 @@ class Settings(BaseSettings):
     OFFICE_LONGITUDE: float = float(os.getenv("OFFICE_LONGITUDE", "80.1220"))
     GEOFENCE_RADIUS_METERS: float = float(os.getenv("GEOFENCE_RADIUS_METERS", "100.0"))
     
+    # SMTP Email Settings
+    SMTP_HOST: str = os.getenv("SMTP_HOST", "")
+    SMTP_PORT: int = int(os.getenv("SMTP_PORT", "587"))
+    SMTP_TLS: bool = os.getenv("SMTP_TLS", "True").lower() == "true"
+    SMTP_SSL: bool = os.getenv("SMTP_SSL", "False").lower() == "true"
+    SMTP_USER: str = os.getenv("SMTP_USER", "")
+    SMTP_PASSWORD: str = os.getenv("SMTP_PASSWORD", "")
+    EMAILS_FROM_EMAIL: str = os.getenv("EMAILS_FROM_EMAIL", "noreply@mcc.edu")
+    EMAILS_FROM_NAME: str = os.getenv("EMAILS_FROM_NAME", "MCC IMMS")
+    
     # CORS — allow all origins for LAN / multi-device access
     BACKEND_CORS_ORIGINS: List[str] = ["*"]
 

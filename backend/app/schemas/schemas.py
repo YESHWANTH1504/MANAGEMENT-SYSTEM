@@ -64,7 +64,7 @@ class InternBase(BaseModel):
     project_description: Optional[str] = None
     start_date: Optional[datetime.date] = None
     end_date: Optional[datetime.date] = None
-    internship_status: str = "active"
+    internship_status: Optional[str] = "active"
     programming_languages: Optional[str] = None
     frameworks: Optional[str] = None
     tools_used: Optional[str] = None
@@ -116,7 +116,7 @@ class EmployeeBase(BaseModel):
     department: Optional[str] = None
     designation: Optional[str] = None
     joining_date: Optional[datetime.date] = None
-    employment_status: str = "active"
+    employment_status: Optional[str] = "active"
     project_name: Optional[str] = None
     project_description: Optional[str] = None
     programming_languages: Optional[str] = None

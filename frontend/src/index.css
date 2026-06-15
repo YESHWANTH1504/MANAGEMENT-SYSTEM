@@ -1,40 +1,56 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+html {
+  font-size: 19px;
+}
+
+/* Force identical font family on all elements, buttons, inputs, selects, textareas, and options */
+*, input, select, textarea, button, option, optgroup {
+  font-family: "Segoe UI", Arial, sans-serif !important;
+}
+
+/* Enable form controls to inherit baseline relative font sizes and weights from parents, while allowing overrides by utility classes */
+input, select, textarea, button, option, optgroup {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+input::placeholder, textarea::placeholder {
+  font-family: "Segoe UI", Arial, sans-serif !important;
+}
+
+/* Scale up tiny static pixel sizes to prevent character crowding and breaking */
+.text-\[8px\] { font-size: 12px !important; }
+.text-\[9px\] { font-size: 13.5px !important; }
+.text-\[10px\] { font-size: 14.5px !important; }
+.text-\[11px\] { font-size: 15.5px !important; }
+.text-\[12px\] { font-size: 16.5px !important; }
+
 @layer base {
   body {
-    background: 
-      radial-gradient(circle at 5% 5%, rgba(37, 99, 235, 0.04) 0%, transparent 40%),
-      radial-gradient(circle at 95% 95%, rgba(59, 130, 246, 0.03) 0%, transparent 45%),
-      radial-gradient(circle at 85% 15%, rgba(99, 102, 241, 0.02) 0%, transparent 35%),
-      linear-gradient(135deg, #ffffff 0%, #F8FAFC 100%);
+    background: #b6e9fc;
     background-attachment: fixed;
-    @apply text-slate-800 font-sans antialiased transition-colors duration-300 min-h-screen;
+    @apply text-slate-900 font-sans font-medium subpixel-antialiased transition-colors duration-300 min-h-screen;
   }
 
   body.dark {
-    background: 
-      radial-gradient(circle at 5% 5%, rgba(37, 99, 235, 0.12) 0%, transparent 40%),
-      radial-gradient(circle at 95% 95%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
-      radial-gradient(circle at 85% 15%, rgba(99, 102, 241, 0.06) 0%, transparent 35%),
-      linear-gradient(135deg, #0F172A 0%, #020617 100%);
+    background: #1c4d5e;
     background-attachment: fixed;
     @apply text-slate-100;
   }
 }
 
 @layer components {
-  /* Premium Glassmorphic Card Styling - tinted white in light mode */
+  /* Clean Solid Cards - matching reference image */
   .glass-card {
-    @apply bg-white/80 backdrop-blur-xl border border-slate-200/60 shadow-lg rounded-2xl dark:bg-slate-900/45 dark:backdrop-blur-xl dark:border-white/10 dark:shadow-2xl dark:shadow-slate-950/20;
+    @apply bg-[#1c4d5e] border border-[#1c4d5e]/20 shadow-[0_8px_30px_rgba(28,77,94,0.12)] rounded-3xl text-[#b6e9fc] dark:bg-slate-900/90 dark:backdrop-blur-xl dark:border-white/5 dark:shadow-[0_12px_40px_rgba(0,0,0,0.35)];
   }
 
   /* Animated Dashboard card hover */
   .dashboard-card {
-    @apply glass-card p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-slate-900/10 hover:border-brand-300 dark:hover:border-brand-500/30;
+    @apply glass-card p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(28,77,94,0.2)] hover:border-brand-300 dark:hover:border-brand-500/30;
   }
 
   /* Custom Premium Scrollbar */
@@ -123,39 +139,49 @@
   @apply transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] active:translate-y-[0.5px];
 }
 
-/* Unify Login background gradient with body */
+/* Unify Login background with body */
 .login-bg-gradient {
-  background: linear-gradient(135deg, #ffffff 0%, #F8FAFC 100%);
+  background: #b6e9fc;
 }
 .dark .login-bg-gradient {
-  background: linear-gradient(135deg, #0F172A 0%, #020617 100%);
+  background: #1c4d5e;
 }
 
 .login-glass-card {
-  @apply bg-white/80 border border-slate-200/60 shadow-2xl rounded-[32px] dark:bg-slate-900/45 dark:backdrop-blur-2xl dark:border-white/10;
+  @apply bg-[#1c4d5e] border border-[#1c4d5e]/20 shadow-2xl rounded-[32px] text-[#b6e9fc];
 }
 
 .login-input-group {
-  @apply bg-slate-50/50 border border-slate-200/50 rounded-xl dark:bg-slate-950/20 dark:border-white/10;
+  @apply bg-white border border-slate-200 rounded-xl text-[#1c4d5e];
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .login-input-group:focus-within {
-  border-color: rgba(124, 58, 237, 0.5) !important; /* Violet-600 */
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2) !important;
+  border-color: rgba(28, 77, 94, 0.6) !important; /* Secondary Dark Blue */
+  box-shadow: 0 0 0 3px rgba(28, 77, 94, 0.25) !important;
   transform: translateY(-1px);
 }
 
-/* Global Form Element Focus transitions and Violet glow highlights */
+.dark .login-input-group:focus-within {
+  border-color: rgba(182, 233, 252, 0.6) !important; /* Primary Light Blue */
+  box-shadow: 0 0 0 3px rgba(182, 233, 252, 0.25) !important;
+}
+
+/* Global Form Element Focus transitions */
 input, textarea, select {
   transition: border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 input:focus, textarea:focus, select:focus {
   outline: none !important;
-  border-color: rgba(124, 58, 237, 0.5) !important; /* Violet-600 */
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2) !important;
+  border-color: rgba(28, 77, 94, 0.6) !important;
+  box-shadow: 0 0 0 3px rgba(28, 77, 94, 0.2) !important;
   transform: translateY(-0.5px);
+}
+
+.dark input:focus, .dark textarea:focus, .dark select:focus {
+  border-color: rgba(182, 233, 252, 0.6) !important;
+  box-shadow: 0 0 0 3px rgba(182, 233, 252, 0.2) !important;
 }
 
 /* Premium micro-animations & custom classes */
@@ -268,7 +294,7 @@ input:focus, textarea:focus, select:focus {
   left: 0;
   right: 0;
   height: 3px;
-  background: rgba(124, 58, 237, 0.1);
+  background: rgba(28, 77, 94, 0.1);
   z-index: 50;
   overflow: hidden;
 }
@@ -278,7 +304,7 @@ input:focus, textarea:focus, select:focus {
   top: 0;
   bottom: 0;
   width: 30%;
-  background: #7c3aed;
+  background: #1c4d5e;
   animation: progressLine 1.5s ease-in-out infinite;
 }
 
@@ -294,7 +320,7 @@ input:focus, textarea:focus, select:focus {
   left: 16px;
   width: 0;
   height: 2px;
-  background-color: #7c3aed;
+  background-color: #1c4d5e;
   transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
@@ -316,7 +342,6 @@ input:focus, textarea:focus, select:focus {
 
 .floating-label-input ~ label {
   position: absolute;
-  left: 1rem;
   top: 50%;
   transform: translateY(-50%);
   font-size: 0.95rem;
@@ -330,21 +355,21 @@ input:focus, textarea:focus, select:focus {
 .floating-label-input:not(:placeholder-shown) ~ label {
   top: 30%;
   transform: translateY(-50%) scale(0.75);
-  color: #7c3aed;
+  color: #1c4d5e;
 }
 
 .dark .floating-label-input:focus ~ label,
 .dark .floating-label-input:not(:placeholder-shown) ~ label {
-  color: #a78bfa;
+  color: #b6e9fc;
 }
 
 /* Pulsing Halo Glow Effect */
 @keyframes haloPulse {
   0% {
-    box-shadow: 0 0 0 0px rgba(124, 58, 237, 0.4), 0 0 0 0px rgba(139, 92, 246, 0.2);
+    box-shadow: 0 0 0 0px rgba(28, 77, 94, 0.4), 0 0 0 0px rgba(182, 233, 252, 0.2);
   }
   100% {
-    box-shadow: 0 0 0 10px rgba(124, 58, 237, 0), 0 0 0 20px rgba(139, 92, 246, 0);
+    box-shadow: 0 0 0 10px rgba(28, 77, 94, 0), 0 0 0 20px rgba(182, 233, 252, 0);
   }
 }
 
@@ -387,7 +412,570 @@ input:focus, textarea:focus, select:focus {
   animation: confettiPop 1s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
 }
 
+/* ==========================================================================
+   SOLID BLUE/TEAL CONTRAST THEME OVERRIDES
+   ========================================================================== */
 
+/* Force all cards to have the secondary dark blue background */
+.glass-card, .dashboard-card, .login-glass-card, .welcome-hero-banner {
+  background-color: #1c4d5e !important;
+}
 
+/* Force all welcome banners to have the secondary dark blue color */
+.welcome-hero-banner {
+  background-color: #1c4d5e !important;
+}
 
+/* Ensure text inside glass-card, dashboard-card, login-glass-card, and welcome banner is primary light blue color by default */
+.glass-card *, .dashboard-card *, .login-glass-card *, .welcome-hero-banner * {
+  color: #b6e9fc !important;
+}
 
+/* Prevent button text/icon color from being overridden by card wildcard selectors */
+.glass-card button *, .dashboard-card button *, .login-glass-card button *, .drawer-custom button * {
+  color: inherit !important;
+}
+
+/* 1. Re-enable form element styles (inputs, textareas, selects, options) */
+.glass-card input, .login-glass-card input, .drawer-custom input,
+.glass-card textarea, .login-glass-card textarea, .drawer-custom textarea,
+.glass-card select, .login-glass-card select, .drawer-custom select {
+  color: #1c4d5e !important;
+  background-color: #ffffff !important;
+  border-color: #b6e9fc !important;
+}
+
+.glass-card select option, .login-glass-card select option, .drawer-custom select option {
+  color: #1c4d5e !important;
+  background-color: #ffffff !important;
+}
+
+.glass-card input::placeholder, .login-glass-card input::placeholder {
+  color: rgba(28, 77, 94, 0.5) !important;
+}
+
+/* 2. Re-style all generic buttons inside cards to look like clean, filled action pills */
+.glass-card button.bg-brand-600, .login-glass-card button.bg-brand-600,
+.glass-card button.bg-brand-700, .login-glass-card button.bg-brand-700,
+.glass-card button.bg-brand-500, .login-glass-card button.bg-brand-500,
+.glass-card button:not([class*="text-red"]):not([class*="bg-transparent"]):not([class*="border-slate"]),
+.login-glass-card button:not([class*="text-red"]):not([class*="bg-transparent"]),
+.drawer-custom button:not([class*="text-red"]):not([class*="bg-transparent"]) {
+  color: #1c4d5e !important;
+  background-color: #b6e9fc !important;
+}
+
+.glass-card button.bg-brand-600:hover, .login-glass-card button.bg-brand-600:hover,
+.glass-card button.bg-brand-700:hover, .login-glass-card button.bg-brand-700:hover,
+.glass-card button.bg-brand-500:hover, .login-glass-card button.bg-brand-500:hover {
+  background-color: #a0e1f4 !important;
+}
+
+/* Ensure table row hover matches the blue theme without overlay blocking primary text */
+.glass-card tr:hover, .login-glass-card tr:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Force the sidebar to have the secondary dark blue background */
+.sidebar-custom {
+  background-color: #1c4d5e !important;
+  border-right-color: rgba(182, 233, 252, 0.2) !important;
+}
+
+/* In the sidebar, all the text and links should be in the primary light blue color */
+.sidebar-custom a, .sidebar-custom span, .sidebar-custom p, .sidebar-custom button, .sidebar-custom div, .sidebar-custom * {
+  color: #b6e9fc !important;
+}
+
+.sidebar-custom a svg {
+  color: #b6e9fc !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+/* Hover state for inactive links */
+.sidebar-custom a:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+}
+
+.sidebar-custom a:hover svg {
+  color: #ffffff !important;
+}
+
+/* Active sidebar link background should be primary light blue and text should be secondary dark blue */
+.sidebar-custom a.bg-brand-200,
+.sidebar-custom a.bg-brand-200 *,
+.sidebar-custom a.bg-brand-200:hover,
+.sidebar-custom a.bg-brand-200:hover * {
+  background-color: #b6e9fc !important;
+  color: #1c4d5e !important;
+}
+
+.sidebar-custom a.bg-brand-200 svg,
+.sidebar-custom a.bg-brand-200:hover svg {
+  color: #1c4d5e !important;
+}
+
+/* Sidebar separators and borders */
+.sidebar-custom div {
+  border-color: rgba(182, 233, 252, 0.2) !important;
+}
+
+/* User account text color */
+.sidebar-custom p.text-brand-200\/80 {
+  color: rgba(182, 233, 252, 0.85) !important;
+}
+
+/* ==========================================================================
+   RIGHT SIDEBAR DRAWERS CONTRAST THEME (AI ASSISTANT & NOTIFICATIONS)
+   ========================================================================== */
+
+/* Force the right-side drawers to have the secondary dark blue background */
+.drawer-custom {
+  background-color: #1c4d5e !important;
+  border-left-color: rgba(182, 233, 252, 0.2) !important;
+}
+
+/* Ensure text inside right-side drawers defaults to primary light blue */
+.drawer-custom *,
+.drawer-custom h1, .drawer-custom h2, .drawer-custom h3, .drawer-custom h4, .drawer-custom h5, .drawer-custom h6,
+.drawer-custom p, .drawer-custom span, .drawer-custom label, .drawer-custom div {
+  color: #b6e9fc !important;
+}
+
+/* Header/Footer bg inside drawers */
+.drawer-custom div.bg-slate-50\/50, .drawer-custom div.bg-slate-900\/30,
+.drawer-custom div.bg-slate-50\/20, .drawer-custom div.bg-slate-900\/10,
+.drawer-custom form.bg-slate-50, .drawer-custom form.bg-slate-950 {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(182, 233, 252, 0.2) !important;
+}
+
+/* Input boxes in drawers */
+.drawer-custom input {
+  background-color: #ffffff !important;
+  color: #1c4d5e !important;
+  border-color: #b6e9fc !important;
+}
+
+.drawer-custom input::placeholder {
+  color: rgba(28, 77, 94, 0.5) !important;
+}
+
+/* Brand buttons in drawers */
+.drawer-custom button.bg-brand-600, .drawer-custom button.bg-brand-500,
+.drawer-custom button[type="submit"] {
+  background-color: #b6e9fc !important;
+  color: #1c4d5e !important;
+}
+.drawer-custom button.bg-brand-600:hover, .drawer-custom button.bg-brand-500:hover,
+.drawer-custom button[type="submit"]:hover {
+  background-color: #a0e1f4 !important;
+}
+
+/* Close/X buttons in drawers */
+.drawer-custom button.text-slate-400 {
+  color: #b6e9fc !important;
+}
+.drawer-custom button.text-slate-400:hover,
+.drawer-custom button.text-slate-400:hover svg,
+.drawer-custom button.text-slate-400:hover * {
+  color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* AI quick prompts / suggestion panels buttons */
+.drawer-custom button.bg-slate-100, .drawer-custom button.dark\:bg-slate-800 {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #b6e9fc !important;
+  border-color: rgba(182, 233, 252, 0.2) !important;
+}
+.drawer-custom button.bg-slate-100:hover, .drawer-custom button.dark\:bg-slate-800:hover {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+}
+
+/* Messages styling inside assistant */
+.drawer-custom .bg-slate-100\/70, .drawer-custom .dark\:bg-slate-800\/80 {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  color: #b6e9fc !important;
+  border-color: rgba(182, 233, 252, 0.15) !important;
+}
+
+/* User message balloon should contrast nicely */
+.drawer-custom .bg-brand-600,
+.drawer-custom .bg-brand-600 * {
+  background-color: #b6e9fc !important;
+  color: #1c4d5e !important;
+}
+
+/* Notifications items styles inside drawer */
+.drawer-custom .border {
+  border-color: rgba(182, 233, 252, 0.15) !important;
+}
+.drawer-custom div.bg-white\/40, .drawer-custom div.dark\:bg-slate-900\/40 {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+.drawer-custom div.bg-white, .drawer-custom div.dark\:bg-slate-900 {
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  color: #b6e9fc !important;
+  border-color: #b6e9fc !important;
+}
+
+/* Header text at the top of the page (e.g. Dashboard) should be in the secondary dark blue color */
+.main-content-transition header h1,
+.main-content-transition header button,
+.main-content-transition header span,
+.main-content-transition header * {
+  color: #1c4d5e !important;
+}
+
+.main-content-transition header svg {
+  stroke: #1c4d5e !important;
+}
+
+/* ==========================================================================
+   DARK THEME INVERSION OVERRIDES
+   ========================================================================== */
+
+/* Page Background in Dark Mode becomes secondary Dark Blue */
+.dark body, body.dark {
+  background-color: #1c4d5e !important;
+}
+
+.dark .login-bg-gradient {
+  background-color: #1c4d5e !important;
+}
+
+/* Card backgrounds in Dark Mode become primary Light Blue */
+.dark .glass-card, .dark .dashboard-card, .dark .login-glass-card, .dark .welcome-hero-banner {
+  background-color: #b6e9fc !important;
+  border-color: rgba(28, 77, 94, 0.15) !important;
+}
+
+/* Card text in Dark Mode becomes secondary Dark Blue */
+.dark .glass-card *, .dark .dashboard-card *, .dark .login-glass-card *, .dark .welcome-hero-banner * {
+  color: #1c4d5e !important;
+}
+
+/* Re-style form controls in dark mode cards to have white background and dark blue text */
+.dark .glass-card input, .dark .login-glass-card input, .dark .drawer-custom input,
+.dark .glass-card textarea, .dark .login-glass-card textarea, .dark .drawer-custom textarea,
+.dark .glass-card select, .dark .login-glass-card select, .dark .drawer-custom select {
+  color: #1c4d5e !important;
+  background-color: #ffffff !important;
+  border-color: #1c4d5e !important;
+}
+
+.dark .glass-card select option, .dark .login-glass-card select option, .dark .drawer-custom select option {
+  color: #1c4d5e !important;
+  background-color: #ffffff !important;
+}
+
+.dark .glass-card input::placeholder, .dark .login-glass-card input::placeholder {
+  color: rgba(28, 77, 94, 0.5) !important;
+}
+
+/* Generic buttons in dark mode cards invert to Dark Blue background with Light Blue text */
+.dark .glass-card button.bg-brand-600, .dark .login-glass-card button.bg-brand-600,
+.dark .glass-card button.bg-brand-700, .dark .login-glass-card button.bg-brand-700,
+.dark .glass-card button.bg-brand-500, .dark .login-glass-card button.bg-brand-500,
+.dark .glass-card button:not([class*="text-red"]):not([class*="bg-transparent"]):not([class*="border-slate"]),
+.dark .login-glass-card button:not([class*="text-red"]):not([class*="bg-transparent"]),
+.dark .drawer-custom button:not([class*="text-red"]):not([class*="bg-transparent"]) {
+  color: #b6e9fc !important;
+  background-color: #1c4d5e !important;
+}
+
+.dark .glass-card button.bg-brand-600:hover, .dark .login-glass-card button.bg-brand-600:hover,
+.dark .glass-card button.bg-brand-700:hover, .dark .login-glass-card button.bg-brand-700:hover,
+.dark .glass-card button.bg-brand-500:hover, .dark .login-glass-card button.bg-brand-500:hover {
+  background-color: #133e4d !important;
+}
+
+/* Table rows hover state in dark mode cards */
+.dark .glass-card tr:hover, .dark .login-glass-card tr:hover {
+  background-color: rgba(28, 77, 94, 0.08) !important;
+}
+
+/* Sidebar background in Dark Mode becomes primary Light Blue */
+.dark .sidebar-custom {
+  background-color: #b6e9fc !important;
+  border-right-color: rgba(28, 77, 94, 0.2) !important;
+}
+
+/* Sidebar text and links in Dark Mode become secondary Dark Blue */
+.dark .sidebar-custom a, .dark .sidebar-custom span, .dark .sidebar-custom p, .dark .sidebar-custom button, .dark .sidebar-custom div, .dark .sidebar-custom * {
+  color: #1c4d5e !important;
+}
+
+.dark .sidebar-custom a svg {
+  color: #1c4d5e !important;
+}
+
+/* Hover state for inactive links in dark mode sidebar */
+.dark .sidebar-custom a:hover {
+  background-color: rgba(28, 77, 94, 0.08) !important;
+  color: #1c4d5e !important;
+}
+
+.dark .sidebar-custom a:hover svg {
+  color: #1c4d5e !important;
+}
+
+/* Active sidebar link in Dark Mode becomes Dark Blue background with Light Blue text */
+.dark .sidebar-custom a.bg-brand-200,
+.dark .sidebar-custom a.bg-brand-200 *,
+.dark .sidebar-custom a.bg-brand-200:hover,
+.dark .sidebar-custom a.bg-brand-200:hover * {
+  background-color: #1c4d5e !important;
+  color: #b6e9fc !important;
+}
+
+.dark .sidebar-custom a.bg-brand-200 svg,
+.dark .sidebar-custom a.bg-brand-200:hover svg {
+  color: #b6e9fc !important;
+}
+
+/* Sidebar separators in dark mode */
+.dark .sidebar-custom div {
+  border-color: rgba(28, 77, 94, 0.2) !important;
+}
+
+/* User account text color in dark mode */
+.dark .sidebar-custom p.text-brand-200\/80 {
+  color: rgba(28, 77, 94, 0.85) !important;
+}
+
+/* Topbar text/title at the top of the page in Dark Mode becomes Light Blue */
+.dark .main-content-transition header h1,
+.dark .main-content-transition header button,
+.dark .main-content-transition header span,
+.dark .main-content-transition header * {
+  color: #b6e9fc !important;
+}
+
+.dark .main-content-transition header svg {
+  stroke: #b6e9fc !important;
+}
+
+/* Right-side drawers in Dark Mode become primary Light Blue */
+.dark .drawer-custom {
+  background-color: #b6e9fc !important;
+  border-left-color: rgba(28, 77, 94, 0.2) !important;
+}
+
+/* Ensure text inside drawers in Dark Mode becomes secondary Dark Blue */
+.dark .drawer-custom *,
+.dark .drawer-custom h1, .dark .drawer-custom h2, .dark .drawer-custom h3, .dark .drawer-custom h4, .dark .drawer-custom h5, .dark .drawer-custom h6,
+.dark .drawer-custom p, .dark .drawer-custom span, .dark .drawer-custom label, .dark .drawer-custom div {
+  color: #1c4d5e !important;
+}
+
+/* Header/Footer background elements inside drawers in dark mode */
+.dark .drawer-custom div.bg-slate-50\/50, .dark .drawer-custom div.bg-slate-900\/30,
+.dark .drawer-custom div.bg-slate-50\/20, .dark .drawer-custom div.bg-slate-900\/10,
+.dark .drawer-custom form.bg-slate-50, .dark .drawer-custom form.bg-slate-950 {
+  background-color: rgba(28, 77, 94, 0.05) !important;
+  border-color: rgba(28, 77, 94, 0.2) !important;
+}
+
+/* Input boxes in drawers in dark mode */
+.dark .drawer-custom input {
+  background-color: #ffffff !important;
+  color: #1c4d5e !important;
+  border-color: #1c4d5e !important;
+}
+
+/* Buttons in drawers in dark mode */
+.dark .drawer-custom button.bg-brand-600, .dark .drawer-custom button.bg-brand-500,
+.dark .drawer-custom button[type="submit"] {
+  background-color: #1c4d5e !important;
+  color: #b6e9fc !important;
+}
+.dark .drawer-custom button.bg-brand-600:hover, .dark .drawer-custom button.bg-brand-500:hover,
+.dark .drawer-custom button[type="submit"]:hover {
+  background-color: #133e4d !important;
+}
+
+/* Close/X buttons inside drawers in dark mode */
+.dark .drawer-custom button.text-slate-400 {
+  color: #1c4d5e !important;
+}
+.dark .drawer-custom button.text-slate-400:hover,
+.dark .drawer-custom button.text-slate-400:hover svg,
+.dark .drawer-custom button.text-slate-400:hover * {
+  color: #ffffff !important;
+  background-color: rgba(28, 77, 94, 0.1) !important;
+}
+
+/* Messages styling inside assistant in dark mode */
+.dark .drawer-custom .bg-slate-100\/70, .dark .drawer-custom .dark\:bg-slate-800\/80 {
+  background-color: rgba(28, 77, 94, 0.08) !important;
+  color: #1c4d5e !important;
+  border-color: rgba(28, 77, 94, 0.15) !important;
+}
+
+/* User message balloon inside assistant in dark mode */
+.dark .drawer-custom .bg-brand-600,
+.dark .drawer-custom .bg-brand-600 * {
+  background-color: #1c4d5e !important;
+  color: #b6e9fc !important;
+}
+
+/* Notifications items styles inside drawer in dark mode */
+.dark .drawer-custom .border {
+  border-color: rgba(28, 77, 94, 0.15) !important;
+}
+.dark .drawer-custom div.bg-white\/40, .dark .drawer-custom div.dark\:bg-slate-900\/40 {
+  background-color: rgba(28, 77, 94, 0.05) !important;
+  color: rgba(28, 77, 94, 0.7) !important;
+}
+.dark .drawer-custom div.bg-white, .dark .drawer-custom div.dark\:bg-slate-900 {
+  background-color: rgba(28, 77, 94, 0.12) !important;
+  color: #1c4d5e !important;
+  border-color: #1c4d5e !important;
+}
+
+/* Nested light background containers inside cards in dark mode become transparent white overlays */
+.dark .glass-card div[class*="bg-slate-50"],
+.dark .glass-card div[class*="bg-slate-100"],
+.dark .glass-card p[class*="bg-slate-50"],
+.dark .glass-card p[class*="bg-slate-100"],
+.dark .glass-card tr[class*="bg-slate-100"],
+.dark .glass-card div[class*="bg-slate-200"],
+.dark .glass-card p[class*="bg-slate-200"],
+.dark .glass-card div[class*="bg-white/70"],
+.dark .glass-card p[class*="bg-white/70"],
+.dark .glass-card div[class*="bg-white/50"],
+.dark .glass-card p[class*="bg-white/50"],
+.dark .login-glass-card div[class*="bg-slate-50"],
+.dark .login-glass-card div[class*="bg-slate-100"] {
+  background-color: rgba(255, 255, 255, 0.45) !important;
+  border-color: rgba(28, 77, 94, 0.15) !important;
+}
+
+/* Status text indicator colors inside cards in Dark Mode */
+.dark .glass-card .text-emerald-500, .dark .glass-card .text-emerald-500 *,
+.dark .dashboard-card .text-emerald-500, .dark .dashboard-card .text-emerald-500 *,
+.dark .glass-card .text-emerald-800, .dark .glass-card .text-emerald-800 *,
+.dark .glass-card .text-emerald-300, .dark .glass-card .text-emerald-300 *,
+.dark .drawer-custom .text-emerald-500, .dark .drawer-custom .text-emerald-500 *,
+.dark .drawer-custom .text-emerald-800, .dark .drawer-custom .text-emerald-800 * {
+  color: #065f46 !important; /* Dark Green status */
+}
+
+.dark .glass-card .text-amber-500, .dark .glass-card .text-amber-500 *,
+.dark .dashboard-card .text-amber-500, .dark .dashboard-card .text-amber-500 *,
+.dark .glass-card .text-amber-800, .dark .glass-card .text-amber-800 *,
+.dark .glass-card .text-amber-300, .dark .glass-card .text-amber-300 *,
+.dark .drawer-custom .text-amber-500, .dark .drawer-custom .text-amber-500 *,
+.dark .drawer-custom .text-amber-800, .dark .drawer-custom .text-amber-800 * {
+  color: #92400e !important; /* Dark Amber status */
+}
+
+.dark .glass-card .text-red-500, .dark .glass-card .text-red-500 *,
+.dark .dashboard-card .text-red-500, .dark .dashboard-card .text-red-500 *,
+.dark .glass-card .text-red-800, .dark .glass-card .text-red-800 *,
+.dark .glass-card .text-red-300, .dark .glass-card .text-red-300 *,
+.dark .drawer-custom .text-red-500, .dark .drawer-custom .text-red-500 *,
+.dark .drawer-custom .text-red-800, .dark .drawer-custom .text-red-800 * {
+  color: #991b1b !important; /* Dark Red status */
+}
+
+/* ==========================================================================
+   NESTED LIGHT-CONTAINERS OVERRIDES & STATUS COLORS
+   ========================================================================== */
+
+/* Force nested light background containers inside cards/sidebar/drawers to use dark transparent overlays so that Light Blue text on them is perfectly visible */
+.glass-card div[class*="bg-slate-50"],
+.glass-card div[class*="bg-slate-100"],
+.glass-card p[class*="bg-slate-50"],
+.glass-card p[class*="bg-slate-100"],
+.glass-card tr[class*="bg-slate-100"],
+.glass-card div[class*="bg-slate-200"],
+.glass-card p[class*="bg-slate-200"],
+.glass-card div[class*="bg-white/70"],
+.glass-card p[class*="bg-white/70"],
+.glass-card div[class*="bg-white/50"],
+.glass-card p[class*="bg-white/50"],
+.dashboard-card div[class*="bg-slate-50"],
+.dashboard-card div[class*="bg-slate-100"],
+.dashboard-card p[class*="bg-slate-50"],
+.dashboard-card p[class*="bg-slate-100"],
+.dashboard-card tr[class*="bg-slate-100"],
+.dashboard-card div[class*="bg-slate-200"],
+.dashboard-card p[class*="bg-slate-200"],
+.dashboard-card div[class*="bg-white/70"],
+.dashboard-card p[class*="bg-white/70"],
+.dashboard-card div[class*="bg-white/50"],
+.dashboard-card p[class*="bg-white/50"],
+.login-glass-card div[class*="bg-slate-50"],
+.login-glass-card div[class*="bg-slate-100"] {
+  background-color: rgba(0, 0, 0, 0.25) !important;
+  border-color: rgba(182, 233, 252, 0.15) !important;
+}
+
+/* Re-enable status text indicator colors inside cards for visibility */
+.glass-card .text-emerald-500, .glass-card .text-emerald-500 *,
+.dashboard-card .text-emerald-500, .dashboard-card .text-emerald-500 *,
+.glass-card .text-emerald-800, .glass-card .text-emerald-800 *,
+.glass-card .text-emerald-300, .glass-card .text-emerald-300 *,
+.drawer-custom .text-emerald-500, .drawer-custom .text-emerald-500 *,
+.drawer-custom .text-emerald-800, .drawer-custom .text-emerald-800 * {
+  color: #10b981 !important; /* Green status */
+}
+
+.glass-card .text-amber-500, .glass-card .text-amber-500 *,
+.dashboard-card .text-amber-500, .dashboard-card .text-amber-500 *,
+.glass-card .text-amber-800, .glass-card .text-amber-800 *,
+.glass-card .text-amber-300, .glass-card .text-amber-300 *,
+.drawer-custom .text-amber-500, .drawer-custom .text-amber-500 *,
+.drawer-custom .text-amber-800, .drawer-custom .text-amber-800 * {
+  color: #f59e0b !important; /* Amber status */
+}
+
+.glass-card .text-red-500, .glass-card .text-red-500 *,
+.dashboard-card .text-red-500, .dashboard-card .text-red-500 *,
+.glass-card .text-red-800, .glass-card .text-red-800 *,
+.glass-card .text-red-300, .glass-card .text-red-300 *,
+.drawer-custom .text-red-500, .drawer-custom .text-red-500 *,
+.drawer-custom .text-red-800, .drawer-custom .text-red-800 * {
+  color: #ef4444 !important; /* Red status */
+}
+
+.glass-card .text-purple-500, .glass-card .text-purple-500 *,
+.dashboard-card .text-purple-500, .dashboard-card .text-purple-500 *,
+.glass-card .text-purple-700, .glass-card .text-purple-700 *,
+.glass-card .text-purple-300, .glass-card .text-purple-300 * {
+  color: #a855f7 !important; /* Purple status */
+}
+
+.glass-card .text-pink-500, .glass-card .text-pink-500 *,
+.dashboard-card .text-pink-500, .dashboard-card .text-pink-500 *,
+.glass-card .text-pink-700, .glass-card .text-pink-700 * {
+  color: #ec4899 !important; /* Pink status */
+}
+
+.glass-card .text-yellow-500, .glass-card .text-yellow-500 *,
+.dashboard-card .text-yellow-500, .dashboard-card .text-yellow-500 *,
+.glass-card .text-yellow-700, .glass-card .text-yellow-700 *,
+.glass-card .text-yellow-350, .glass-card .text-yellow-350 * {
+  color: #eab308 !important; /* Yellow status */
+}
+
+/* Active and Inactive Status Badges - Solid Green Band & Red Band Overrides */
+.status-badge-active {
+  background-color: #10b981 !important; /* solid green */
+  color: #ffffff !important; /* white text */
+  border: 1px solid #059669 !important;
+  font-weight: 700 !important;
+}
+
+.status-badge-inactive {
+  background-color: #ef4444 !important; /* solid red */
+  color: #ffffff !important; /* white text */
+  border: 1px solid #dc2626 !important;
+  font-weight: 700 !important;
+}

@@ -208,3 +208,95 @@ def delete_attachment(
     db.delete(attachment)
     db.commit()
     return {"detail": "File deleted successfully"}
+
+@router.post("/upload-avatar")
+def upload_avatar(
+    user_id: int = Form(...),
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(deps.get_current_user)
+):
+    """
+    Upload a profile picture for an intern or employee.
+    Admin can upload for any user, standard users can only upload for themselves.
+    """
+    # Access check: admin or owner
+    if current_user.role != "admin" and current_user.id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only upload your own profile photo"
+        )
+        
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+
+    # Validate file extension
+    filename = file.filename
+    _, ext = os.path.splitext(filename.lower())
+    ext = ext.lstrip(".")
+    if ext not in ["jpg", "jpeg", "png", "webp", "gif"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Unsupported image format. Allowed formats: jpg, jpeg, png, webp, gif"
+        )
+
+    # Ensure upload directory exists
+    os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
+
+    # Generate unique filename
+    unique_filename = f"avatar_{user_id}_{uuid.uuid4().hex[:8]}.{ext}"
+    file_path = os.path.join(settings.UPLOAD_DIR, unique_filename)
+
+    # Save file
+    try:
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to save profile picture: {str(e)}"
+        )
+
+    # Update database record
+    profile = None
+    if user.role == "intern":
+        profile = db.query(models.Intern).filter(models.Intern.user_id == user.id).first()
+    elif user.role == "employee":
+        profile = db.query(models.Employee).filter(models.Employee.user_id == user.id).first()
+
+    if not profile:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Profile not found"
+        )
+
+    # Delete old avatar file if it exists and is local
+    if profile.profile_photo:
+        old_path = os.path.join(settings.UPLOAD_DIR, profile.profile_photo)
+        if os.path.exists(old_path):
+            try:
+                os.remove(old_path)
+            except Exception:
+                pass
+
+    profile.profile_photo = unique_filename
+    db.commit()
+
+    # Sync to MongoDB if applicable
+    try:
+        from app.db import mongodb
+        if user.role == "intern":
+            mongodb.sync_intern_to_mongo(db, profile.id)
+        elif user.role == "employee":
+            mongodb.sync_employee_to_mongo(db, profile.id)
+    except Exception:
+        pass
+
+    return {
+        "detail": "Profile photo uploaded successfully",
+        "profile_photo": unique_filename
+    }

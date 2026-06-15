@@ -164,7 +164,7 @@ const Timeline = () => {
   return (
     <div className="space-y-8">
       {/* 🏅 PORTFOLIO SUMMARY CARD */}
-      <div className="bg-gradient-to-r from-brand-700 to-slate-800 dark:from-brand-950 dark:to-slate-900 rounded-3xl p-6 md:p-8 text-white relative overflow-hidden shadow-xl">
+      <div className="bg-brand-600 dark:bg-brand-900 rounded-3xl p-6 md:p-8 text-white relative overflow-hidden shadow-xl">
         <div className="absolute top-0 right-0 w-64 h-64 bg-brand-500/10 blur-3xl pointer-events-none"></div>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative">
           <div className="flex items-center space-x-4">
@@ -200,7 +200,7 @@ const Timeline = () => {
         </div>
 
         {/* Core metrics mini widgets */}
-        <div className="grid grid-cols-3 gap-4 border-t border-slate-800/80 mt-8 pt-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-slate-800/80 mt-8 pt-6">
           <div className="text-center">
             <p className="text-slate-500 text-[10px] font-semibold uppercase tracking-wider">Attendance Rate</p>
             <p className="text-lg md:text-xl font-bold text-emerald-400 mt-1">{stats.attendance_rate}%</p>

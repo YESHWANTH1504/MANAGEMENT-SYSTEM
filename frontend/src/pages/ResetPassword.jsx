@@ -183,10 +183,10 @@ const ResetPassword = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-transparent px-4 py-8 md:p-0 relative overflow-hidden select-none">
       {/* Colorful Mesh Gradient Background Blobs */}
-      <div className="absolute top-[-10%] left-[-15%] w-[450px] h-[450px] rounded-full bg-violet-500/10 dark:bg-violet-500/15 blur-[120px] pointer-events-none animate-morph-1"></div>
-      <div className="absolute bottom-[-10%] right-[-15%] w-[550px] h-[550px] rounded-full bg-fuchsia-500/8 dark:bg-fuchsia-500/10 blur-[140px] pointer-events-none animate-morph-2"></div>
-      <div className="absolute top-[35%] left-[25%] w-[350px] h-[350px] rounded-full bg-indigo-500/8 dark:bg-indigo-500/10 blur-[100px] pointer-events-none animate-morph-1"></div>
-      <div className="absolute bottom-[30%] left-[-10%] w-[400px] h-[400px] rounded-full bg-violet-600/5 dark:bg-violet-600/8 blur-[110px] pointer-events-none animate-morph-2"></div>
+      <div className="absolute top-[-10%] left-[-15%] w-[450px] h-[450px] rounded-full bg-brand-500/10 dark:bg-brand-500/15 blur-[120px] pointer-events-none animate-morph-1"></div>
+      <div className="absolute bottom-[-10%] right-[-15%] w-[550px] h-[550px] rounded-full bg-brand-300/8 dark:bg-brand-300/10 blur-[140px] pointer-events-none animate-morph-2"></div>
+      <div className="absolute top-[35%] left-[25%] w-[350px] h-[350px] rounded-full bg-brand-400/8 dark:bg-brand-400/10 blur-[100px] pointer-events-none animate-morph-1"></div>
+      <div className="absolute bottom-[30%] left-[-10%] w-[400px] h-[400px] rounded-full bg-brand-600/5 dark:bg-brand-600/8 blur-[110px] pointer-events-none animate-morph-2"></div>
 
       {/* Canvas Interactive Particles */}
       <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none z-0" />
@@ -195,7 +195,7 @@ const ResetPassword = () => {
       <div className="absolute top-4 right-4 z-50">
         <button 
           onClick={toggleTheme}
-          className="p-2.5 bg-white/70 dark:bg-slate-900/35 backdrop-blur-md border border-slate-200/50 dark:border-white/10 text-slate-800 dark:text-white rounded-xl shadow-md transition-all hover:scale-105 active:scale-95"
+          className="p-2.5 bg-white/70 dark:bg-slate-900/35 backdrop-blur-md border border-slate-200/50 dark:border-white/10 text-slate-800 dark:text-white rounded-full shadow-md transition-all hover:scale-105 active:scale-95"
         >
           {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
         </button>

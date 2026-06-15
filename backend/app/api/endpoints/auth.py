@@ -354,14 +354,13 @@ def forgot_password(
     # Build simulated reset link
     reset_link = f"http://localhost:5173/reset-password?token={token}"
     
-    # Print to console/terminal
-    print(f"\n=======================================================")
-    print(f"PASSWORD RESET SIMULATION FOR: {user.email}")
-    print(f"Reset Link: {reset_link}")
-    print(f"=======================================================\n")
+    # Send password reset email
+    from app.core.email import send_reset_password_email
+    email_sent = send_reset_password_email(user.email, reset_link)
     
     return {
-        "detail": "Password reset link generated successfully.",
+        "detail": "Password reset link has been sent to your email." if email_sent else "Password reset link generated successfully (Simulated).",
+        "email_sent": email_sent,
         "reset_link": reset_link
     }
 

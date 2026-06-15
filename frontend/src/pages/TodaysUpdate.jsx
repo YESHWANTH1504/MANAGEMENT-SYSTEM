@@ -9,6 +9,14 @@ import {
   Mic, MicOff
 } from 'lucide-react';
 
+const getProfilePhotoUrl = (photoName) => {
+  if (!photoName) return '';
+  if (photoName.startsWith('http://') || photoName.startsWith('https://')) return photoName;
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+  const BASE_URL = API_URL.replace('/api/v1', '');
+  return `${BASE_URL}/static/uploads/${photoName}`;
+};
+
 const TodaysUpdate = () => {
   const { user } = useAuth();
   const { showToast, confirm } = useToast();
@@ -130,13 +138,15 @@ const TodaysUpdate = () => {
           user_id: i.user_id,
           name: i.full_name,
           role: 'intern',
-          identifier: i.internship_id || 'Intern'
+          identifier: i.internship_id || 'Intern',
+          profile_photo: i.profile_photo || null
         })),
         ...employeesRes.data.map(e => ({
           user_id: e.user_id,
           name: e.full_name,
           role: 'employee',
-          identifier: e.employee_id || 'Employee'
+          identifier: e.employee_id || 'Employee',
+          profile_photo: e.profile_photo || null
         }))
       ];
       
@@ -350,7 +360,7 @@ const TodaysUpdate = () => {
               value={selectedProfileId}
               onChange={(e) => setSelectedProfileId(e.target.value)}
               disabled={loadingProfiles}
-              className="w-full text-xs pl-10 pr-8 py-2.5 bg-slate-100/50 dark:bg-slate-950 border border-slate-205 dark:border-slate-800 rounded-xl focus:outline-none focus:border-brand-500 text-slate-900 dark:text-white appearance-none"
+              className="w-full text-xs pl-10 pr-8 py-2.5 bg-slate-100/50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-brand-500 text-slate-900 dark:text-white appearance-none"
             >
               {loadingProfiles ? (
                 <option value="">Loading profiles...</option>
@@ -389,7 +399,7 @@ const TodaysUpdate = () => {
                     required
                     value={reportForm.date}
                     onChange={handleFormChange}
-                    className="w-full text-xs px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-205 dark:border-slate-800 rounded-xl focus:outline-none focus:border-brand-500 dark:text-white"
+                    className="w-full text-xs px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-brand-500 dark:text-white"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -416,7 +426,7 @@ const TodaysUpdate = () => {
                   placeholder="E.g. Audio capture layouts, video player templates"
                   value={reportForm.task_title}
                   onChange={handleFormChange}
-                  className="w-full text-xs px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-205 dark:border-slate-800 rounded-xl focus:outline-none focus:border-brand-500 dark:text-white"
+                  className="w-full text-xs px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-brand-500 dark:text-white"
                 />
               </div>
 
@@ -454,7 +464,7 @@ const TodaysUpdate = () => {
                   placeholder="Briefly describe the task achievements, bugs fixed, or features built..."
                   value={reportForm.description}
                   onChange={handleFormChange}
-                  className="w-full text-xs px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-205 dark:border-slate-800 rounded-xl focus:outline-none focus:border-brand-500 dark:text-white"
+                  className="w-full text-xs px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-brand-500 dark:text-white"
                 />
               </div>
 
@@ -467,7 +477,7 @@ const TodaysUpdate = () => {
                     placeholder="React, CSS, SQLite"
                     value={reportForm.technologies_used}
                     onChange={handleFormChange}
-                    className="w-full text-xs px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-205 dark:border-slate-800 rounded-xl focus:outline-none focus:border-brand-500 dark:text-white"
+                    className="w-full text-xs px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-brand-500 dark:text-white"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -478,7 +488,7 @@ const TodaysUpdate = () => {
                     placeholder="Run API integration tests, setup SSL keys"
                     value={reportForm.tomorrow_plan}
                     onChange={handleFormChange}
-                    className="w-full text-xs px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-205 dark:border-slate-800 rounded-xl focus:outline-none focus:border-brand-500 dark:text-white"
+                    className="w-full text-xs px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-brand-500 dark:text-white"
                   />
                 </div>
               </div>
@@ -486,7 +496,7 @@ const TodaysUpdate = () => {
               {/* File Upload Section supporting all formats */}
               <div className="space-y-2.5">
                 <label className="text-[10px] font-bold text-slate-655 dark:text-slate-355 uppercase">Proof Attachments (Supports Audio, Video, Image, Docs)</label>
-                <div className="border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-purple-500 dark:hover:border-purple-500/80 rounded-2xl p-5 text-center cursor-pointer transition-all bg-slate-50/50 dark:bg-slate-955/20 relative">
+                <div className="border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-purple-500 dark:hover:border-purple-500/80 rounded-2xl p-5 text-center cursor-pointer transition-all bg-slate-50/50 dark:bg-slate-950/20 relative">
                   <input 
                     type="file"
                     multiple
@@ -543,9 +553,17 @@ const TodaysUpdate = () => {
               {selectedProfile && (
                 <div className="space-y-4">
                   <div className="flex items-center space-x-4 bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl border border-slate-200/50 dark:border-slate-800/50">
-                    <div className="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-lg">
-                      {selectedProfile.name[0].toUpperCase()}
-                    </div>
+                    {selectedProfile.profile_photo ? (
+                      <img
+                        src={getProfilePhotoUrl(selectedProfile.profile_photo)}
+                        alt={selectedProfile.name}
+                        className="w-12 h-12 rounded-xl object-cover border border-slate-200 dark:border-slate-700 shadow-sm shrink-0"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-lg shrink-0">
+                        {selectedProfile.name[0].toUpperCase()}
+                      </div>
+                    )}
                     <div>
                       <h5 className="text-sm font-bold text-slate-800 dark:text-white">{selectedProfile.name}</h5>
                       <p className="text-[10px] text-slate-500 dark:text-slate-400 capitalize font-medium mt-0.5">
@@ -584,7 +602,7 @@ const TodaysUpdate = () => {
                 reports.map((rep) => (
                   <div key={rep.id} className="relative pl-6 border-l-2 border-purple-500/20 last:border-l-transparent pb-4">
                     <div className="absolute -left-[5px] top-1.5 w-2.5 h-2.5 rounded-full bg-pink-500 ring-4 ring-purple-500/15"></div>
-                    <div className="bg-slate-50/70 dark:bg-slate-950/40 border border-slate-205/50 dark:border-slate-850/50 rounded-xl p-4">
+                    <div className="bg-slate-50/70 dark:bg-slate-950/40 border border-slate-200/50 dark:border-slate-850/50 rounded-xl p-4">
                       <div className="flex justify-between items-start flex-wrap gap-2">
                         <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">{new Date(rep.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                         <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded bg-brand-500/10 text-brand-500">{rep.status}</span>
@@ -687,7 +705,7 @@ const TodaysUpdate = () => {
               </p>
             </div>
 
-            <div className="flex-1 p-6 overflow-y-auto flex items-center justify-center bg-slate-50/50 dark:bg-slate-955/10 min-h-0">
+            <div className="flex-1 p-6 overflow-y-auto flex items-center justify-center bg-slate-50/50 dark:bg-slate-950/10 min-h-0">
               {previewFile.file_type === 'image' && (
                 <img 
                   src={getFileUrl(previewFile.id)} 

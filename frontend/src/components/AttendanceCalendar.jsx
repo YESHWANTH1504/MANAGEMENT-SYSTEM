@@ -223,7 +223,7 @@ const AttendanceCalendar = ({ attendanceRecords = [], startDate = null, isLoadin
         </div>
 
         {/* Selected Day Details Panel Column */}
-        <div className="w-full md:w-64 shrink-0 flex flex-col bg-slate-50/50 dark:bg-slate-950/20 border border-slate-205/50 dark:border-slate-805/50 p-4 rounded-2xl min-h-[180px]">
+        <div className="w-full md:w-64 shrink-0 flex flex-col bg-slate-50/50 dark:bg-slate-950/20 border border-slate-200/50 dark:border-slate-800/50 p-4 rounded-2xl min-h-[180px]">
           {selectedDay ? (
             <div className="space-y-4 select-text">
               {/* Header Details */}
@@ -282,7 +282,7 @@ const AttendanceCalendar = ({ attendanceRecords = [], startDate = null, isLoadin
                           <p className="text-[9px] text-slate-500">
                             Coords: {selectedDay.record.latitude.toFixed(4)}, {selectedDay.record.longitude.toFixed(4)}
                           </p>
-                          <div className="mt-2.5 overflow-hidden rounded-xl border border-slate-205 dark:border-slate-805 shadow-sm">
+                          <div className="mt-2.5 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
                             <iframe 
                               title="Location Map"
                               width="100%" 

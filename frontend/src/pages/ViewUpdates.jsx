@@ -7,6 +7,14 @@ import {
 } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 
+const getProfilePhotoUrl = (photoName) => {
+  if (!photoName) return '';
+  if (photoName.startsWith('http://') || photoName.startsWith('https://')) return photoName;
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+  const BASE_URL = API_URL.replace('/api/v1', '');
+  return `${BASE_URL}/static/uploads/${photoName}`;
+};
+
 const ViewUpdates = () => {
   const { showToast } = useToast();
   
@@ -115,14 +123,14 @@ const ViewUpdates = () => {
   // Filtered lists of candidates for dropdown
   const getFilteredCandidates = () => {
     if (filterRole === 'intern') {
-      return interns.map(i => ({ user_id: i.user_id, full_name: i.full_name, label: `[Intern] ${i.full_name}` }));
+      return interns.map(i => ({ user_id: i.user_id, full_name: i.full_name, label: `[Intern] ${i.full_name}`, profile_photo: i.profile_photo }));
     }
     if (filterRole === 'employee') {
-      return employees.map(e => ({ user_id: e.user_id, full_name: e.full_name, label: `[Employee] ${e.full_name}` }));
+      return employees.map(e => ({ user_id: e.user_id, full_name: e.full_name, label: `[Employee] ${e.full_name}`, profile_photo: e.profile_photo }));
     }
     const list = [
-      ...interns.map(i => ({ user_id: i.user_id, full_name: i.full_name, label: `[Intern] ${i.full_name}` })),
-      ...employees.map(e => ({ user_id: e.user_id, full_name: e.full_name, label: `[Employee] ${e.full_name}` }))
+      ...interns.map(i => ({ user_id: i.user_id, full_name: i.full_name, label: `[Intern] ${i.full_name}`, profile_photo: i.profile_photo })),
+      ...employees.map(e => ({ user_id: e.user_id, full_name: e.full_name, label: `[Employee] ${e.full_name}`, profile_photo: e.profile_photo }))
     ];
     return list.sort((a, b) => a.full_name.localeCompare(b.full_name));
   };
@@ -155,6 +163,14 @@ const ViewUpdates = () => {
     return true;
   });
 
+  // Build a fast lookup map: user_id -> profile_photo
+  const userPhotoMap = {};
+  [...interns, ...employees].forEach(p => {
+    if (p.user_id && p.profile_photo) {
+      userPhotoMap[p.user_id] = p.profile_photo;
+    }
+  });
+
   return (
     <div className="space-y-6">
       
@@ -164,40 +180,6 @@ const ViewUpdates = () => {
         
         <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
           
-          {/* Segmented Tab Control for Role Selection */}
-          <div className="flex bg-slate-100 dark:bg-slate-950 p-1 rounded-xl w-full lg:w-auto self-stretch">
-            <button
-              onClick={() => handleRoleTabChange('all')}
-              className={`flex-1 lg:flex-none text-xs px-5 py-2.5 rounded-lg font-bold transition-all ${
-                filterRole === 'all' 
-                  ? 'bg-white dark:bg-slate-900 text-brand-600 dark:text-white shadow-sm' 
-                  : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
-              }`}
-            >
-              All Roles
-            </button>
-            <button
-              onClick={() => handleRoleTabChange('intern')}
-              className={`flex-1 lg:flex-none text-xs px-5 py-2.5 rounded-lg font-bold transition-all ${
-                filterRole === 'intern' 
-                  ? 'bg-white dark:bg-slate-900 text-brand-600 dark:text-white shadow-sm' 
-                  : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
-              }`}
-            >
-              Interns
-            </button>
-            <button
-              onClick={() => handleRoleTabChange('employee')}
-              className={`flex-1 lg:flex-none text-xs px-5 py-2.5 rounded-lg font-bold transition-all ${
-                filterRole === 'employee' 
-                  ? 'bg-white dark:bg-slate-900 text-brand-600 dark:text-white shadow-sm' 
-                  : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
-              }`}
-            >
-              Employees
-            </button>
-          </div>
-
           <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto items-stretch sm:items-center flex-1">
             
             {/* Candidate Selector Dropdown */}
@@ -236,6 +218,40 @@ const ViewUpdates = () => {
               />
             </div>
           </div>
+
+          {/* Segmented Tab Control for Role Selection - Spaced and Aligned Right */}
+          <div className="flex gap-3 w-full lg:w-auto justify-end self-stretch lg:self-auto">
+            <button
+              onClick={() => handleRoleTabChange('all')}
+              className={`flex-1 lg:flex-none text-xs px-5 py-2.5 rounded-xl font-bold transition-all border ${
+                filterRole === 'all' 
+                  ? 'bg-brand-600 dark:bg-brand-500 text-white border-transparent shadow-sm' 
+                  : 'bg-white dark:bg-slate-950 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:text-slate-850 dark:hover:text-slate-200'
+              }`}
+            >
+              All Roles
+            </button>
+            <button
+              onClick={() => handleRoleTabChange('intern')}
+              className={`flex-1 lg:flex-none text-xs px-5 py-2.5 rounded-xl font-bold transition-all border ${
+                filterRole === 'intern' 
+                  ? 'bg-brand-600 dark:bg-brand-500 text-white border-transparent shadow-sm' 
+                  : 'bg-white dark:bg-slate-950 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:text-slate-850 dark:hover:text-slate-200'
+              }`}
+            >
+              Interns
+            </button>
+            <button
+              onClick={() => handleRoleTabChange('employee')}
+              className={`flex-1 lg:flex-none text-xs px-5 py-2.5 rounded-xl font-bold transition-all border ${
+                filterRole === 'employee' 
+                  ? 'bg-brand-600 dark:bg-brand-500 text-white border-transparent shadow-sm' 
+                  : 'bg-white dark:bg-slate-950 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:text-slate-850 dark:hover:text-slate-200'
+              }`}
+            >
+              Employees
+            </button>
+          </div>
         </div>
       </div>
 
@@ -257,10 +273,18 @@ const ViewUpdates = () => {
               
               {/* Report Card Header */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/50 dark:border-white/5">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-xl bg-brand-500/10 text-brand-600 dark:text-brand-400 border border-brand-500/25 flex items-center justify-center font-bold text-sm">
-                    {(report.user_name || 'U')[0].toUpperCase()}
-                  </div>
+              <div className="flex items-center space-x-3">
+                  {userPhotoMap[report.user_id] ? (
+                    <img
+                      src={getProfilePhotoUrl(userPhotoMap[report.user_id])}
+                      alt={report.user_name}
+                      className="w-10 h-10 rounded-xl object-cover border border-slate-200 dark:border-slate-700 shadow-sm shrink-0"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-xl bg-brand-500/10 text-brand-600 dark:text-brand-400 border border-brand-500/25 flex items-center justify-center font-bold text-sm shrink-0">
+                      {(report.user_name || 'U')[0].toUpperCase()}
+                    </div>
+                  )}
                   <div>
                     <h3 className="text-sm font-bold text-slate-800 dark:text-white">
                       {report.user_name || 'Anonymous User'}

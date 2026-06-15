@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 
 const DashboardLayout = ({ children }) => {
-  const { user, logout, theme, toggleTheme } = useAuth();
+  const { user, login, logout, theme, toggleTheme } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     return localStorage.getItem('sidebarCollapsed') === 'true';
@@ -18,8 +18,18 @@ const DashboardLayout = ({ children }) => {
   const [notifDrawerOpen, setNotifDrawerOpen] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [paletteSearch, setPaletteSearch] = useState('');
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [previewImageUrl, setPreviewImageUrl] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
+
+  const getProfilePhotoUrl = (photoName) => {
+    if (!photoName) return '';
+    if (photoName.startsWith('http://') || photoName.startsWith('https://')) return photoName;
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+    const BASE_URL = API_URL.replace('/api/v1', '');
+    return `${BASE_URL}/static/uploads/${photoName}`;
+  };
 
   const toggleSidebarCollapse = () => {
     setSidebarCollapsed(prev => {
@@ -365,10 +375,10 @@ const DashboardLayout = ({ children }) => {
     <div className="min-h-screen flex bg-transparent transition-colors duration-300 relative overflow-hidden">
       {/* SVG Liquid Morphing Background Blobs */}
       <div style={{ filter: 'url(#liquid-goo)' }} className="absolute inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-15%] w-[450px] h-[450px] rounded-full bg-blue-500/10 dark:bg-blue-500/15 blur-[40px] pointer-events-none animate-morph-1"></div>
-        <div className="absolute bottom-[-10%] right-[-15%] w-[550px] h-[550px] rounded-full bg-sky-500/8 dark:bg-sky-500/10 blur-[50px] pointer-events-none animate-morph-2"></div>
-        <div className="absolute top-[35%] left-[25%] w-[350px] h-[350px] rounded-full bg-indigo-500/8 dark:bg-indigo-500/10 blur-[30px] pointer-events-none animate-morph-1"></div>
-        <div className="absolute bottom-[30%] left-[-10%] w-[400px] h-[400px] rounded-full bg-blue-600/5 dark:bg-blue-600/8 blur-[40px] pointer-events-none animate-morph-2"></div>
+        <div className="absolute top-[-10%] left-[-15%] w-[450px] h-[450px] rounded-full bg-brand-500/10 dark:bg-brand-500/15 blur-[40px] pointer-events-none animate-morph-1"></div>
+        <div className="absolute bottom-[-10%] right-[-15%] w-[550px] h-[550px] rounded-full bg-brand-300/8 dark:bg-brand-300/10 blur-[50px] pointer-events-none animate-morph-2"></div>
+        <div className="absolute top-[35%] left-[25%] w-[350px] h-[350px] rounded-full bg-brand-400/8 dark:bg-brand-400/10 blur-[30px] pointer-events-none animate-morph-1"></div>
+        <div className="absolute bottom-[30%] left-[-10%] w-[400px] h-[400px] rounded-full bg-brand-600/5 dark:bg-brand-600/8 blur-[40px] pointer-events-none animate-morph-2"></div>
       </div>
       
       {/* Background Interactive Faint Constellation Network */}
@@ -386,25 +396,28 @@ const DashboardLayout = ({ children }) => {
       </svg>
  
       {/* SIDEBAR - Desktop & Mobile */}
-      <aside className={`fixed inset-y-0 left-0 z-40 sidebar-transition ${sidebarCollapsed ? 'w-20' : 'w-64'} bg-white/60 dark:bg-slate-950/40 backdrop-blur-xl border-r border-slate-200/50 dark:border-white/10 text-slate-800 dark:text-white/90 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col`}>
+      <aside className={`fixed inset-y-0 left-0 z-40 sidebar-transition ${sidebarCollapsed ? 'w-20' : 'w-64'} sidebar-custom bg-brand-600 dark:bg-brand-900 border-r border-brand-700/30 dark:border-white/10 text-white/80 dark:text-white/90 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col`}>
         {/* Sidebar Header */}
-        <div className="h-16 flex items-center justify-between px-6 border-b border-slate-200/50 dark:border-white/10">
-          <div className="flex items-center space-x-2 overflow-hidden">
-            <div className="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center font-bold text-white shadow-lg animate-pulse-slow shrink-0">M</div>
-            <span className={`font-bold text-lg text-slate-800 dark:text-white tracking-wider transition-all duration-300 ${sidebarCollapsed ? 'opacity-0 w-0 scale-90 pointer-events-none' : 'opacity-100'}`}>MCC PANEL</span>
+        <div className="h-20 flex items-center justify-center px-4 border-b border-brand-700/40 dark:border-white/10 relative">
+          <div className="flex items-center justify-center space-x-3 overflow-hidden">
+            <img 
+              src="/logo.png" 
+              alt="MCC Logo" 
+              onClick={() => setPreviewImageUrl('/logo.png')}
+              className="w-12 h-12 rounded-xl object-contain bg-white shadow-md shrink-0 cursor-pointer hover:scale-105 active:scale-95 transition-transform" 
+            />
+            <span className={`font-extrabold text-2xl text-white dark:text-white tracking-wider transition-all duration-300 ${sidebarCollapsed ? 'opacity-0 w-0 scale-90 pointer-events-none' : 'opacity-100'}`}>MCC</span>
           </div>
-          <div className="flex items-center space-x-1">
-            <button 
-              onClick={toggleSidebarCollapse} 
-              className="hidden md:flex p-1.5 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
-              title={sidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-            >
-              {sidebarCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-            </button>
-            <button onClick={() => setSidebarOpen(false)} className="md:hidden text-slate-500 dark:text-slate-355 hover:text-slate-800 dark:hover:text-white">
-              <X size={20} />
-            </button>
-          </div>
+          <button 
+            onClick={toggleSidebarCollapse} 
+            className="hidden md:flex absolute right-4 p-1.5 rounded-lg text-brand-200 hover:text-white hover:bg-brand-700/50 transition-colors"
+            title={sidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+          >
+            {sidebarCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+          </button>
+          <button onClick={() => setSidebarOpen(false)} className="md:hidden absolute right-4 text-brand-200 hover:text-white">
+            <X size={20} />
+          </button>
         </div>
  
         {/* Navigation Links */}
@@ -417,14 +430,14 @@ const DashboardLayout = ({ children }) => {
                 key={item.name}
                 to={item.path}
                 onClick={() => setSidebarOpen(false)}
-                className={`flex items-center ${sidebarCollapsed ? 'md:justify-center md:space-x-0' : 'space-x-3'} px-4 py-3 rounded-xl text-sm font-semibold transition-all hover:scale-[1.01] active:scale-[0.99] page-fade-in stagger-${(index % 5) + 1} ${
+                className={`flex items-center ${sidebarCollapsed ? 'md:justify-center md:space-x-0' : 'space-x-3'} px-4 py-3 rounded-xl text-sm font-semibold transition-all hover:scale-[1.01] active:scale-[0.99] page-fade-in group stagger-${(index % 5) + 1} ${
                   isActive 
-                    ? 'bg-gradient-to-r from-brand-600 to-indigo-500 dark:from-brand-700 dark:to-indigo-600 text-white shadow-lg shadow-brand-500/25 scale-[1.02] border-r-4 border-indigo-400' 
-                    : 'text-slate-600 dark:text-slate-350 hover:bg-slate-100/80 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white nav-link-underline'
+                    ? 'bg-brand-200 text-brand-600 shadow-md scale-[1.02]' 
+                    : 'text-brand-100 hover:bg-brand-700/60 hover:text-white'
                 }`}
                 title={sidebarCollapsed ? item.name : ''}
               >
-                <Icon size={18} className={isActive ? 'text-white' : 'text-slate-500 dark:text-slate-400'} />
+                <Icon size={18} className={isActive ? 'text-brand-600' : 'text-brand-200'} />
                 <span className={`transition-all duration-300 ${sidebarCollapsed ? 'opacity-0 w-0 scale-90 overflow-hidden pointer-events-none ml-0' : 'opacity-100 ml-3'}`}>{item.name}</span>
                 {isActive && !sidebarCollapsed && <ChevronRight size={14} className="ml-auto text-white/60" />}
               </Link>
@@ -433,23 +446,29 @@ const DashboardLayout = ({ children }) => {
         </nav>
 
         {/* Sidebar User Footer */}
-        <div className="p-4 border-t border-slate-200/80 dark:border-white/10 flex flex-col space-y-3">
+        <div className="p-4 border-t border-brand-700/40 dark:border-white/10 flex flex-col space-y-3">
           <div className="flex items-center space-x-3 px-2 overflow-hidden">
-            <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/10 flex items-center justify-center text-slate-700 dark:text-white border border-slate-200 dark:border-white/10 overflow-hidden shrink-0">
+            <div className="w-11 h-11 rounded-2xl bg-brand-700/50 dark:bg-white/10 flex items-center justify-center text-brand-100 dark:text-white border-2 border-white/20 dark:border-white/10 overflow-hidden shrink-0 shadow-md">
               {user?.profile?.profile_photo ? (
-                <img src={user.profile.profile_photo} alt="Profile" className="w-full h-full object-cover" />
+                <img 
+                  src={getProfilePhotoUrl(user.profile.profile_photo)} 
+                  alt="Profile" 
+                  onClick={() => setPreviewImageUrl(getProfilePhotoUrl(user.profile.profile_photo))}
+                  className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform" 
+                  onError={(e) => { e.target.style.display = 'none'; e.target.parentNode.querySelector('.fallback-icon')?.classList.remove('hidden'); }}
+                />
               ) : (
                 <UserCircle size={24} />
               )}
             </div>
             <div className={`overflow-hidden transition-all duration-300 ${sidebarCollapsed ? 'opacity-0 w-0 scale-90 pointer-events-none' : 'opacity-100'}`}>
-              <p className="text-sm font-bold text-slate-800 dark:text-white truncate">{user?.profile?.full_name || user?.email?.split('@')[0] || ''}</p>
-              <p className="text-xs text-slate-550 dark:text-slate-400 capitalize">{user?.role} Account</p>
+              <p className="text-sm font-bold text-white dark:text-white truncate">{user?.profile?.full_name || user?.email?.split('@')[0] || ''}</p>
+              <p className="text-xs text-brand-200/80 dark:text-slate-400 capitalize">{user?.role} Account</p>
             </div>
           </div>
           <button 
             onClick={handleLogout}
-            className={`flex items-center space-x-3 w-full px-4 py-2.5 rounded-xl text-sm font-semibold text-red-650 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/20 transition-colors ${sidebarCollapsed ? 'md:justify-center' : ''}`}
+            className={`flex items-center space-x-3 w-full px-4 py-2.5 rounded-xl text-sm font-semibold text-red-200 hover:bg-red-900/30 hover:text-red-100 transition-colors ${sidebarCollapsed ? 'md:justify-center' : ''}`}
             title="Sign Out"
           >
             <LogOut size={18} />
@@ -458,18 +477,26 @@ const DashboardLayout = ({ children }) => {
         </div>
       </aside>
 
+      {/* Mobile Sidebar Backdrop Overlay */}
+      {sidebarOpen && (
+        <div 
+          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs z-30 md:hidden"
+        />
+      )}
+
       {/* Main Container */}
       <div className={`flex-1 main-content-transition ${sidebarCollapsed ? 'md:pl-20' : 'md:pl-64'} flex flex-col min-w-0`}>
         {/* TOPBAR */}
-        <header className="h-16 flex items-center justify-between px-6 bg-white/45 dark:bg-slate-950/20 backdrop-blur-xl border-b border-slate-200/80 dark:border-white/10 sticky top-0 z-30">
+        <header className="h-16 flex items-center justify-between px-6 bg-white/20 dark:bg-brand-900/10 backdrop-blur-md border-b border-white/25 dark:border-white/5 sticky top-0 z-30">
           <div className="flex items-center space-x-3">
             <button 
               onClick={() => setSidebarOpen(true)}
-              className="md:hidden text-slate-700 dark:text-white hover:bg-slate-100 dark:hover:bg-white/10 p-2 rounded-lg"
+              className="md:hidden text-brand-600 dark:text-white hover:bg-white/20 p-2 rounded-lg"
             >
               <Menu size={20} />
             </button>
-            <h1 className="font-extrabold text-lg text-slate-800 dark:text-white capitalize">
+            <h1 className="font-extrabold text-lg text-brand-600 dark:text-white capitalize">
               {location.pathname.replace('/', '').replace('-', ' ') || 'Overview'}
             </h1>
           </div>
@@ -478,7 +505,7 @@ const DashboardLayout = ({ children }) => {
             {/* Theme Toggle */}
             <button 
               onClick={toggleTheme}
-              className="text-slate-700 dark:text-white hover:bg-slate-100 dark:hover:bg-white/10 p-2 rounded-lg transition-colors"
+              className="text-brand-600 dark:text-white hover:bg-white/20 p-2 rounded-lg transition-colors"
             >
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
@@ -487,23 +514,67 @@ const DashboardLayout = ({ children }) => {
             <div className="relative">
               <button 
                 onClick={() => setNotifDrawerOpen(!notifDrawerOpen)}
-                className={`text-slate-700 dark:text-white hover:bg-slate-100 dark:hover:bg-white/10 p-2 rounded-lg relative transition-colors ${unreadNotifCount > 0 ? 'animate-bell-ring' : ''}`}
+                className={`text-brand-600 dark:text-white hover:bg-white/20 p-2 rounded-lg relative transition-colors ${unreadNotifCount > 0 ? 'animate-bell-ring' : ''}`}
               >
                 <Bell size={18} />
                 {unreadNotifCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-brand-500 ring-2 ring-white dark:ring-slate-900"></span>
+                  <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-brand-500 ring-2 ring-brand-200 dark:ring-brand-900"></span>
                 )}
               </button>
             </div>
 
-            {/* Profile Detail Badge */}
-            <div className="flex items-center space-x-2 border-l border-slate-200 dark:border-white/10 pl-4">
-              <span className="text-sm font-semibold text-slate-700 dark:text-white hidden sm:inline-block">
-                {user?.profile?.full_name || user?.email?.split('@')[0] || ''}
-              </span>
-              <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/10 flex items-center justify-center text-slate-700 dark:text-white font-bold border border-slate-200 dark:border-white/25">
-                {(user?.profile?.full_name || user?.email || 'U')[0].toUpperCase()}
-              </div>
+            {/* Profile Detail Badge and Dropdown Menu */}
+            <div className="relative border-l border-white/30 dark:border-white/10 pl-4">
+              <button 
+                onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+                className="flex items-center space-x-2 focus:outline-none transition-opacity hover:opacity-80"
+              >
+                <span className="text-sm font-semibold text-brand-600 dark:text-white hidden sm:inline-block">
+                  {user?.profile?.full_name || user?.email?.split('@')[0] || ''}
+                </span>
+                {user?.profile?.profile_photo ? (
+                  <img 
+                    src={getProfilePhotoUrl(user.profile.profile_photo)} 
+                    alt={user.profile.full_name} 
+                    className="w-8 h-8 rounded-full object-cover border border-white/40 dark:border-white/25 transition-transform hover:scale-105"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-white dark:bg-brand-800 flex items-center justify-center text-brand-600 dark:text-white font-bold border border-white/40 dark:border-white/25 transition-transform hover:scale-105">
+                    {(user?.profile?.full_name || user?.email || 'U')[0].toUpperCase()}
+                  </div>
+                )}
+              </button>
+
+              {/* Profile Dropdown Menu */}
+              {profileMenuOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setProfileMenuOpen(false)}></div>
+                  <div className="absolute right-0 mt-3 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl z-50 overflow-hidden py-1 animate-scale-up origin-top-right">
+                    {user?.profile?.profile_photo && (
+                      <button
+                        onClick={() => {
+                          setProfileMenuOpen(false);
+                          setPreviewImageUrl(getProfilePhotoUrl(user.profile.profile_photo));
+                        }}
+                        className="w-full flex items-center px-4 py-3 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left font-semibold border-b border-slate-100 dark:border-slate-800"
+                      >
+                        <UserCircle size={16} className="mr-2" />
+                        View Profile Photo
+                      </button>
+                    )}
+                    <button
+                      onClick={() => {
+                        setProfileMenuOpen(false);
+                        handleLogout();
+                      }}
+                      className="w-full flex items-center px-4 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors text-left font-semibold"
+                    >
+                      <LogOut size={16} className="mr-2" />
+                      Sign Out
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </header>
@@ -520,7 +591,7 @@ const DashboardLayout = ({ children }) => {
       {/* Floating Action Button */}
       <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end space-y-2">
         {showHelperBubble && (
-          <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur border border-slate-205 dark:border-white/10 px-3 py-2 rounded-2xl shadow-xl text-[10px] font-semibold text-slate-700 dark:text-slate-200 animate-slide-up flex items-center space-x-2 relative pr-7 animate-float z-40">
+          <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur border border-slate-200 dark:border-white/10 px-3 py-2 rounded-2xl shadow-xl text-[10px] font-semibold text-slate-700 dark:text-slate-200 animate-slide-up flex items-center space-x-2 relative pr-7 animate-float z-40">
             <span>Need assistance? Ask me! 🤖</span>
             <button 
               type="button"
@@ -533,7 +604,7 @@ const DashboardLayout = ({ children }) => {
         )}
         <button 
           onClick={() => { setChatOpen(!chatOpen); setShowHelperBubble(false); }}
-          className="w-14 h-14 bg-gradient-to-tr from-brand-600 via-purple-500 to-fuchsia-500 hover:from-brand-500 hover:to-fuchsia-400 text-white rounded-full shadow-2xl shadow-brand-500/30 flex items-center justify-center transition-all hover:scale-110 active:scale-95 hover:rotate-12 group relative border border-white/25 dark:border-white/10"
+          className="w-14 h-14 bg-brand-600 hover:bg-brand-700 text-white rounded-full shadow-2xl shadow-brand-600/30 flex items-center justify-center transition-all hover:scale-110 active:scale-95 hover:rotate-12 group relative border border-white/25 dark:border-white/10"
         >
           <Sparkles size={24} className="group-hover:rotate-12 transition-transform duration-300" />
           <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5">
@@ -544,7 +615,7 @@ const DashboardLayout = ({ children }) => {
       </div>
 
       {/* Slide-out Drawer Panel */}
-      <div className={`fixed inset-y-0 right-0 z-50 w-96 max-w-full bg-white/80 dark:bg-slate-950/80 backdrop-blur-2xl border-l border-slate-205 dark:border-white/10 shadow-2xl flex flex-col ${chatOpen ? 'translate-x-0 spring-drawer' : 'translate-x-full duration-300'}`}>
+      <div className={`fixed inset-y-0 right-0 z-50 w-96 max-w-full drawer-custom bg-[#0f3a48] border-l border-[#0f3a48]/20 shadow-2xl flex flex-col ${chatOpen ? 'translate-x-0 spring-drawer' : 'translate-x-full duration-300'}`}>
         
         {/* Drawer Header */}
         <div className="p-4 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/30">
@@ -716,11 +787,11 @@ const DashboardLayout = ({ children }) => {
       )}
 
       {/* NOTIFICATIONS DRAWER */}
-      <div className={`fixed inset-y-0 right-0 z-50 w-96 max-w-full bg-white/85 dark:bg-slate-950/85 backdrop-blur-2xl border-l border-slate-200/50 dark:border-white/10 shadow-2xl flex flex-col ${notifDrawerOpen ? 'translate-x-0 spring-drawer' : 'translate-x-full duration-300'}`}>
+      <div className={`fixed inset-y-0 right-0 z-50 w-96 max-w-full drawer-custom bg-[#0f3a48] border-l border-[#0f3a48]/20 shadow-2xl flex flex-col ${notifDrawerOpen ? 'translate-x-0 spring-drawer' : 'translate-x-full duration-300'}`}>
         {/* Drawer Header */}
         <div className="p-4 border-b border-slate-200/50 dark:border-white/10 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/30">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 rounded-lg bg-indigo-650 flex items-center justify-center text-white">
+            <div className="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center text-white">
               <Bell size={16} />
             </div>
             <div>
@@ -750,7 +821,7 @@ const DashboardLayout = ({ children }) => {
                 className={`p-3.5 rounded-xl border transition-all text-xs ${
                   notif.is_read 
                     ? 'bg-slate-50/40 dark:bg-slate-900/20 border-slate-100/50 dark:border-white/5 text-slate-500 dark:text-slate-400' 
-                    : 'bg-indigo-500/5 dark:bg-indigo-500/10 border-indigo-500/10 dark:border-indigo-500/20 text-slate-800 dark:text-slate-200'
+                    : 'bg-brand-500/5 dark:bg-brand-500/10 border-brand-500/10 dark:border-brand-500/20 text-slate-850 dark:text-slate-200'
                 }`}
               >
                 <div className="flex items-center justify-between mb-1.5">
@@ -765,7 +836,7 @@ const DashboardLayout = ({ children }) => {
                     onClick={() => {
                       setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, is_read: true } : n));
                     }}
-                    className="text-[9px] font-bold text-indigo-650 dark:text-indigo-405 hover:underline"
+                    className="text-[9px] font-bold text-brand-600 dark:text-brand-400 hover:underline"
                   >
                     Mark as read
                   </button>
@@ -789,6 +860,31 @@ const DashboardLayout = ({ children }) => {
           </div>
         )}
       </div>
+
+      {/* Photo/Logo Lightbox Modal */}
+      {previewImageUrl && (
+        <div 
+          onClick={() => setPreviewImageUrl(null)}
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-md cursor-zoom-out p-4 page-fade-in"
+        >
+          <div 
+            className="relative max-w-2xl w-full bg-white/5 border border-white/10 p-2 rounded-3xl pop-bounce shadow-2xl overflow-hidden" 
+            onClick={e => e.stopPropagation()}
+          >
+            <button 
+              onClick={() => setPreviewImageUrl(null)}
+              className="absolute top-4 right-4 z-50 p-2 rounded-full bg-black/60 hover:bg-black/80 text-white transition-all shadow-md"
+            >
+              <X size={18} />
+            </button>
+            <img 
+              src={previewImageUrl} 
+              alt="Preview" 
+              className={`w-full h-auto max-h-[80vh] object-contain rounded-2xl ${previewImageUrl === '/logo.png' ? 'bg-white p-6' : 'bg-slate-950 p-2'}`}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 

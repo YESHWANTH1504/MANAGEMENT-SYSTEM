@@ -9,27 +9,21 @@ export default {
     extend: {
       colors: {
         brand: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
-          950: '#172554',
+          50: '#f0fbfd',
+          100: '#d2f4fd',
+          200: '#b6e9fc', // Light Blue Primary Background
+          300: '#68d3f1',
+          400: '#2bbbeb',
+          500: '#1ca4c8', // Vibrant Cyan Accent
+          600: '#1c4d5e', // Dark Blue Secondary Card / Sidebar / Welcome Card Background
+          700: '#133e4d', // Darker Blue Hover
+          800: '#0d2d38',
+          900: '#081c24',
+          950: '#020b0e',
         },
       },
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
-      },
-      fontSize: {
-        xs: ['0.85rem', { lineHeight: '1.25rem' }],
-        sm: ['0.95rem', { lineHeight: '1.4rem' }],
-        base: ['1.05rem', { lineHeight: '1.55rem' }],
-        lg: ['1.2rem', { lineHeight: '1.8rem' }],
+        sans: ['"Segoe UI"', 'Arial', 'sans-serif'],
       },
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',

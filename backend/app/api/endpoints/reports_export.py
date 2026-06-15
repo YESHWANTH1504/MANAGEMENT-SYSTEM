@@ -217,6 +217,7 @@ def export_portfolio_pdf(
                 self.frameworks = e.frameworks
                 self.tools_used = e.tools_used
                 self.databases_used = e.databases_used
+                self.profile_photo = e.profile_photo
         intern = MappedProfile(emp)
         is_employee = True
         
@@ -270,6 +271,49 @@ def export_portfolio_pdf(
     elements.append(Paragraph(f"Internship Management & Monitoring System (IMMS) - Generated {datetime.date.today().strftime('%B %d, %Y')}", subtitle_style))
     elements.append(Spacer(1, 10))
 
+    # Resolve profile photo path
+    import os
+    from app.core.config import settings
+    from reportlab.platypus import Image
+    
+    photo_path = None
+    if getattr(intern, "profile_photo", None):
+        resolved_path = os.path.join(settings.UPLOAD_DIR, intern.profile_photo)
+        if os.path.exists(resolved_path):
+            photo_path = resolved_path
+
+    photo_flowable = None
+    if photo_path:
+        try:
+            photo_flowable = Image(photo_path, width=70, height=90)
+            # Add a border to the image
+            photo_table = Table([[photo_flowable]], colWidths=[74], rowHeights=[94])
+            photo_table.setStyle(TableStyle([
+                ('BOX', (0,0), (-1,-1), 1, colors.HexColor('#1A365D')),
+                ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+                ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 1),
+                ('TOPPADDING', (0,0), (-1,-1), 1),
+                ('LEFTPADDING', (0,0), (-1,-1), 1),
+                ('RIGHTPADDING', (0,0), (-1,-1), 1),
+            ]))
+            photo_flowable = photo_table
+        except Exception as e:
+            print(f"Error loading image in PDF: {e}")
+            photo_flowable = None
+
+    if not photo_flowable:
+        # Placeholder box
+        placeholder_text = Paragraph("<font color='#94a3b8' size='8'><b>PASSPORT PHOTO</b></font>", body_style)
+        photo_table = Table([[placeholder_text]], colWidths=[74], rowHeights=[94])
+        photo_table.setStyle(TableStyle([
+            ('BOX', (0,0), (-1,-1), 1, colors.HexColor("#CBD5E1")),
+            ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+            ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#F8FAFC")),
+        ]))
+        photo_flowable = photo_table
+
     # Profile Section
     profile_data = [
         [Paragraph("Intern Name:", bold_body), Paragraph(intern.full_name, body_style), Paragraph("Internship ID:", bold_body), Paragraph(intern.internship_id, body_style)],
@@ -278,7 +322,7 @@ def export_portfolio_pdf(
         [Paragraph("Project Name:", bold_body), Paragraph(intern.project_name or "N/A", body_style), Paragraph("Attendance Rate:", bold_body), Paragraph(f"{att_rate}% ({present_days}/{total_days} days)", body_style)]
     ]
     
-    profile_table = Table(profile_data, colWidths=[100, 160, 100, 160])
+    profile_table = Table(profile_data, colWidths=[90, 130, 90, 130])
     profile_table.setStyle(TableStyle([
         ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#CBD5E1')),
         ('BACKGROUND', (0,0), (0,-1), colors.HexColor('#F8FAFC')),
@@ -286,7 +330,18 @@ def export_portfolio_pdf(
         ('PADDING', (0,0), (-1,-1), 6),
         ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
     ]))
-    elements.append(profile_table)
+
+    # Master Profile Layout Table (Details + Photo)
+    profile_layout_data = [[profile_table, photo_flowable]]
+    profile_layout_table = Table(profile_layout_data, colWidths=[440, 80])
+    profile_layout_table.setStyle(TableStyle([
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('LEFTPADDING', (0,0), (-1,-1), 0),
+        ('RIGHTPADDING', (0,0), (-1,-1), 0),
+        ('TOPPADDING', (0,0), (-1,-1), 0),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 0),
+    ]))
+    elements.append(profile_layout_table)
     elements.append(Spacer(1, 20))
 
     # Technology Section

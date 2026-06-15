@@ -54,7 +54,7 @@ def create_employee(
         department=data.department,
         designation=data.designation,
         joining_date=data.joining_date,
-        employment_status=data.employment_status,
+        employment_status=data.employment_status or "active",
         project_name=data.project_name,
         project_description=data.project_description,
         programming_languages=data.programming_languages,
@@ -170,6 +170,8 @@ def update_employee(
 
     # Apply updates
     for key, value in update_data.items():
+        if key == "employment_status" and not value:
+            continue
         setattr(emp, key, value)
         
     db.commit()

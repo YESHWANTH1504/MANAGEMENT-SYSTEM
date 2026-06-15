@@ -11,6 +11,15 @@ import { useToast } from '../context/ToastContext';
 const EmployeeManagement = () => {
   const navigate = useNavigate();
   const { showToast, confirm } = useToast();
+  
+  const getProfilePhotoUrl = (photoName) => {
+    if (!photoName) return '';
+    if (photoName.startsWith('http://') || photoName.startsWith('https://')) return photoName;
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+    const BASE_URL = API_URL.replace('/api/v1', '');
+    return `${BASE_URL}/static/uploads/${photoName}`;
+  };
+
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -18,13 +27,25 @@ const EmployeeManagement = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   
+  const [customDept, setCustomDept] = useState('');
+  const [customEditDept, setCustomEditDept] = useState('');
+
+  const PREDEFINED_DEPTS = [
+    'Backend Developer',
+    'Full Stack Developer',
+    'Cloud Engineer',
+    'Frontend Developer',
+    'ML Engineer'
+  ];
+  const isPredefinedDept = (dept) => PREDEFINED_DEPTS.includes(dept);
+  
   // Forms State
   const [addForm, setAddForm] = useState({
-    email: '', password: 'Password123', employee_id: '',
-    full_name: '', mobile_number: '', gender: 'Male',
-    department: 'Engineering', designation: 'Software Engineer',
-    joining_date: new Date().toISOString().split('T')[0],
-    employment_status: 'active', project_name: '', project_description: '',
+    email: '', password: '', employee_id: '',
+    full_name: '', mobile_number: '', gender: '',
+    department: '', designation: '',
+    joining_date: '',
+    employment_status: '', project_name: '', project_description: '',
     programming_languages: '', frameworks: '', tools_used: '', databases_used: ''
   });
   
@@ -49,7 +70,8 @@ const EmployeeManagement = () => {
   const filteredEmployees = employees.filter(e => {
     const matchesSearch = e.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           e.employee_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          (e.designation || '').toLowerCase().includes(searchQuery.toLowerCase());
+                          (e.designation || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (e.department || '').toLowerCase().includes(searchQuery.toLowerCase());
     const matchesDept = selectedDept ? e.department === selectedDept : true;
     return matchesSearch && matchesDept;
   });
@@ -70,18 +92,22 @@ const EmployeeManagement = () => {
     e.preventDefault();
     try {
       const payload = { ...addForm };
+      if (payload.department === 'Others') {
+        payload.department = customDept || 'Others';
+      }
       Object.keys(payload).forEach(k => {
         if (payload[k] === '') payload[k] = null;
       });
       await api.post('/employees/', payload);
       setShowAddModal(false);
       // Reset form
+      setCustomDept('');
       setAddForm({
-        email: '', password: 'Password123', employee_id: '',
-        full_name: '', mobile_number: '', gender: 'Male',
-        department: 'Engineering', designation: 'Software Engineer',
-        joining_date: new Date().toISOString().split('T')[0],
-        employment_status: 'active', project_name: '', project_description: '',
+        email: '', password: '', employee_id: '',
+        full_name: '', mobile_number: '', gender: '',
+        department: '', designation: '',
+        joining_date: '',
+        employment_status: '', project_name: '', project_description: '',
         programming_languages: '', frameworks: '', tools_used: '', databases_used: ''
       });
       loadData();
@@ -93,7 +119,12 @@ const EmployeeManagement = () => {
 
   // Edit action
   const startEdit = (emp) => {
-    setEditForm({ ...emp });
+    const isPredefined = isPredefinedDept(emp.department);
+    setEditForm({
+      ...emp,
+      department: isPredefined ? emp.department : 'Others'
+    });
+    setCustomEditDept(isPredefined ? '' : emp.department);
     setShowEditModal(true);
   };
 
@@ -102,11 +133,15 @@ const EmployeeManagement = () => {
     e.preventDefault();
     try {
       const payload = { ...editForm };
+      if (payload.department === 'Others') {
+        payload.department = customEditDept || 'Others';
+      }
       Object.keys(payload).forEach(k => {
         if (payload[k] === '') payload[k] = null;
       });
       await api.put(`/employees/${editForm.id}`, payload);
       setShowEditModal(false);
+      setCustomEditDept('');
       loadData();
       showToast('Employee details updated successfully.', 'success');
     } catch (err) {
@@ -201,8 +236,23 @@ const EmployeeManagement = () => {
                   <tr key={emp.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20">
                     <td className="px-6 py-4 font-mono font-bold text-brand-600 dark:text-brand-400">{emp.employee_id}</td>
                     <td className="px-6 py-4">
-                      <p className="font-bold text-slate-800 dark:text-white">{emp.full_name}</p>
-                      <p className="text-[10px] text-slate-500 mt-0.5">{emp.mobile_number || 'No phone'}</p>
+                      <div className="flex items-center space-x-3">
+                        {emp.profile_photo ? (
+                          <img 
+                            src={getProfilePhotoUrl(emp.profile_photo)} 
+                            alt={emp.full_name} 
+                            className="w-9 h-9 rounded-xl object-cover border border-slate-200 dark:border-slate-800 shadow-sm"
+                          />
+                        ) : (
+                          <div className="w-9 h-9 rounded-xl bg-purple-500/10 dark:bg-purple-550/15 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-sm border border-purple-500/20">
+                            {emp.full_name[0].toUpperCase()}
+                          </div>
+                        )}
+                        <div>
+                          <p className="font-bold text-slate-800 dark:text-white">{emp.full_name}</p>
+                          <p className="text-[10px] text-slate-500 mt-0.5">{emp.mobile_number || 'No phone'}</p>
+                        </div>
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <p className="font-medium text-slate-800 dark:text-white">{emp.designation}</p>
@@ -248,10 +298,10 @@ const EmployeeManagement = () => {
       {/* 📝 REGISTER MODAL */}
       {showAddModal && (
         <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-3xl overflow-hidden shadow-2xl relative max-h-[90vh] flex flex-col">
+          <div className="glass-card border border-slate-200 dark:border-slate-800 w-full max-w-3xl overflow-hidden shadow-2xl relative max-h-[90vh] flex flex-col">
             <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center shrink-0">
               <h3 className="font-bold text-slate-800 dark:text-white">Register New Employee</h3>
-              <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-white bg-slate-100 dark:bg-slate-800 p-1.5 rounded-lg">
+              <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-slate-200 dark:hover:text-white bg-transparent hover:bg-slate-500/20 p-1.5 rounded-lg">
                 <X size={16} />
               </button>
             </div>
@@ -286,6 +336,7 @@ const EmployeeManagement = () => {
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Gender</label>
                   <select name="gender" value={addForm.gender} onChange={handleAddChange} className="w-full text-xs px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl dark:text-white">
+                    <option value="">Select Gender</option>
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
                     <option value="Other">Other</option>
@@ -297,13 +348,28 @@ const EmployeeManagement = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Department</label>
-                  <select name="department" value={addForm.department} onChange={handleAddChange} className="w-full text-xs px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl dark:text-white">
-                    <option value="Engineering">Engineering</option>
-                    <option value="Product">Product Management</option>
-                    <option value="Data & Analytics">Data & Analytics</option>
-                    <option value="Design">Design / UX</option>
-                    <option value="Human Resources">HR / Recruitment</option>
+                  <select name="department" value={addForm.department} onChange={handleAddChange} className="w-full text-xs px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-800 dark:text-white">
+                    <option value="">Select Department</option>
+                    <option value="Backend Developer">Backend Developer</option>
+                    <option value="Full Stack Developer">Full Stack Developer</option>
+                    <option value="Cloud Engineer">Cloud Engineer</option>
+                    <option value="Frontend Developer">Frontend Developer</option>
+                    <option value="ML Engineer">ML Engineer</option>
+                    <option value="Others">Others</option>
                   </select>
+                  {addForm.department === 'Others' && (
+                    <div className="space-y-1 mt-1.5 animate-slide-up">
+                      <label className="text-[9px] font-bold text-brand-600 dark:text-brand-400 uppercase">Specify Department</label>
+                      <input 
+                        type="text" 
+                        required 
+                        value={customDept} 
+                        onChange={(e) => setCustomDept(e.target.value)} 
+                        placeholder="e.g. Sales / Marketing" 
+                        className="w-full text-xs px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg dark:text-white" 
+                      />
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Designation</label>
@@ -327,8 +393,8 @@ const EmployeeManagement = () => {
                 </div>
               </div>
 
-              <div className="pt-4 flex justify-end space-x-2 shrink-0 border-t border-slate-200 dark:border-slate-800">
-                <button type="button" onClick={() => setShowAddModal(false)} className="text-xs px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold rounded-xl transition-all">Cancel</button>
+              <div className="pt-4 flex justify-end space-x-2 shrink-0 border-t border-slate-205 dark:border-slate-795">
+                <button type="button" onClick={() => setShowAddModal(false)} className="text-xs px-4 py-2.5 bg-transparent border border-slate-300 dark:border-slate-700 hover:bg-slate-500/10 font-bold rounded-xl transition-all">Cancel</button>
                 <button type="submit" className="text-xs px-5 py-2.5 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-xl shadow shadow-brand-600/10 transition-all">Save Profile</button>
               </div>
             </form>
@@ -339,10 +405,10 @@ const EmployeeManagement = () => {
       {/* ✏️ EDIT MODAL */}
       {showEditModal && editForm && (
         <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-3xl overflow-hidden shadow-2xl relative max-h-[90vh] flex flex-col">
+          <div className="glass-card border border-slate-200 dark:border-slate-800 w-full max-w-3xl overflow-hidden shadow-2xl relative max-h-[90vh] flex flex-col">
             <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center shrink-0">
               <h3 className="font-bold text-slate-800 dark:text-white">Edit Employee - {editForm.employee_id}</h3>
-              <button onClick={() => setShowEditModal(false)} className="text-slate-400 hover:text-white bg-slate-100 dark:bg-slate-800 p-1.5 rounded-lg">
+              <button onClick={() => setShowEditModal(false)} className="text-slate-400 hover:text-slate-200 dark:hover:text-white bg-transparent hover:bg-slate-500/20 p-1.5 rounded-lg">
                 <X size={16} />
               </button>
             </div>
@@ -372,13 +438,28 @@ const EmployeeManagement = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Department</label>
-                  <select name="department" value={editForm.department || ''} onChange={handleEditChange} className="w-full text-xs px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl dark:text-white">
-                    <option value="Engineering">Engineering</option>
-                    <option value="Product">Product Management</option>
-                    <option value="Data & Analytics">Data & Analytics</option>
-                    <option value="Design">Design / UX</option>
-                    <option value="Human Resources">HR / Recruitment</option>
+                  <select name="department" value={editForm.department || ''} onChange={handleEditChange} className="w-full text-xs px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-800 dark:text-white">
+                    <option value="">Select Department</option>
+                    <option value="Backend Developer">Backend Developer</option>
+                    <option value="Full Stack Developer">Full Stack Developer</option>
+                    <option value="Cloud Engineer">Cloud Engineer</option>
+                    <option value="Frontend Developer">Frontend Developer</option>
+                    <option value="ML Engineer">ML Engineer</option>
+                    <option value="Others">Others</option>
                   </select>
+                  {editForm.department === 'Others' && (
+                    <div className="space-y-1 mt-1.5 animate-slide-up">
+                      <label className="text-[9px] font-bold text-brand-600 dark:text-brand-400 uppercase">Specify Department</label>
+                      <input 
+                        type="text" 
+                        required 
+                        value={customEditDept} 
+                        onChange={(e) => setCustomEditDept(e.target.value)} 
+                        placeholder="e.g. Sales / Marketing" 
+                        className="w-full text-xs px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg dark:text-white" 
+                      />
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Designation</label>
@@ -390,8 +471,8 @@ const EmployeeManagement = () => {
                 </div>
               </div>
 
-              <div className="pt-4 flex justify-end space-x-2 shrink-0 border-t border-slate-200 dark:border-slate-800">
-                <button type="button" onClick={() => setShowEditModal(false)} className="text-xs px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold rounded-xl transition-all">Cancel</button>
+              <div className="pt-4 flex justify-end space-x-2 shrink-0 border-t border-slate-205 dark:border-slate-795">
+                <button type="button" onClick={() => setShowEditModal(false)} className="text-xs px-4 py-2.5 bg-transparent border border-slate-300 dark:border-slate-700 hover:bg-slate-500/10 font-bold rounded-xl transition-all">Cancel</button>
                 <button type="submit" className="text-xs px-5 py-2.5 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-xl shadow shadow-brand-600/10 transition-all">Update Record</button>
               </div>
             </form>

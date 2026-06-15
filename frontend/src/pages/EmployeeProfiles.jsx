@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext';
 import { 
   Search, User, MapPin, Mail, Phone, Calendar, BookOpen, 
   Briefcase, Code, PlusCircle, CheckCircle2, AlertTriangle, Send,
-  FileText, Image as ImageIcon, Video, Music, Paperclip, ArrowLeft, Shield, Sparkles, RefreshCw, AlertCircle, Clock
+  FileText, Image as ImageIcon, Video, Music, Paperclip, ArrowLeft, Shield, Sparkles, RefreshCw, AlertCircle, Clock, Camera, X
 } from 'lucide-react';
 import AttendanceCalendar from '../components/AttendanceCalendar';
 import { 
@@ -15,6 +16,7 @@ import {
 
 const EmployeeProfiles = () => {
   const { showToast } = useToast();
+  const { user } = useAuth();
   const [employees, setEmployees] = useState([]);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [searchText, setSearchText] = useState('');
@@ -28,6 +30,7 @@ const EmployeeProfiles = () => {
   const [activeTab, setActiveTab] = useState('attendance');
   const [weeklySummary, setWeeklySummary] = useState(null);
   const [weeklySummaryLoading, setWeeklySummaryLoading] = useState(false);
+  const [previewPhoto, setPreviewPhoto] = useState(null);
 
   // Form state
   const [reportForm, setReportForm] = useState({
@@ -107,6 +110,65 @@ const EmployeeProfiles = () => {
   useEffect(() => {
     fetchEmployees();
   }, []);
+
+  const getProfilePhotoUrl = (photoName) => {
+    if (!photoName) return '';
+    if (photoName.startsWith('http://') || photoName.startsWith('https://')) return photoName;
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+    const BASE_URL = API_URL.replace('/api/v1', '');
+    return `${BASE_URL}/static/uploads/${photoName}`;
+  };
+
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+      showToast('Please upload an image (JPG, PNG, WEBP, or GIF)', 'error');
+      return;
+    }
+    
+    const formData = new FormData();
+    formData.append('user_id', selectedEmployee.user_id);
+    formData.append('file', file);
+    
+    try {
+      const res = await api.post('/media/upload-avatar', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      const newPhoto = res.data.profile_photo;
+      setSelectedEmployee(prev => ({ ...prev, profile_photo: newPhoto }));
+      setEmployees(prev => prev.map(e => e.id === selectedEmployee.id ? { ...e, profile_photo: newPhoto } : e));
+      showToast('Profile photo updated successfully!', 'success');
+    } catch (err) {
+      showToast(err.response?.data?.detail || 'Failed to upload profile photo.', 'error');
+    }
+  };
+
+  const handleGenerateReport = async () => {
+    try {
+      showToast('Generating report...', 'info');
+      const response = await api.get(`/reports/user/${selectedEmployee.user_id}/download-pdf`, {
+        responseType: 'blob'
+      });
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Accomplishment_Report_${selectedEmployee.full_name.replace(/\s+/g, '_')}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      showToast('Report downloaded successfully!', 'success');
+    } catch (err) {
+      console.error(err);
+      showToast('Failed to generate report.', 'error');
+    }
+  };
 
   useEffect(() => {
     if (selectedEmployee) {
@@ -249,8 +311,23 @@ const EmployeeProfiles = () => {
                     <tr key={emp.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20">
                       <td className="px-6 py-4 font-mono font-bold text-purple-600 dark:text-purple-400">{emp.employee_id}</td>
                       <td className="px-6 py-4">
-                        <p className="font-bold text-slate-800 dark:text-white">{emp.full_name}</p>
-                        <p className="text-[10px] text-slate-500 mt-0.5">{emp.mobile_number || 'No phone'}</p>
+                        <div className="flex items-center space-x-3">
+                          {emp.profile_photo ? (
+                            <img 
+                              src={getProfilePhotoUrl(emp.profile_photo)} 
+                              alt={emp.full_name} 
+                              className="w-9 h-9 rounded-xl object-cover border border-slate-200 dark:border-slate-800 shadow-sm"
+                            />
+                          ) : (
+                            <div className="w-9 h-9 rounded-xl bg-purple-500/10 dark:bg-purple-550/15 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-sm border border-purple-500/20">
+                              {emp.full_name[0].toUpperCase()}
+                            </div>
+                          )}
+                          <div>
+                            <p className="font-bold text-slate-800 dark:text-white">{emp.full_name}</p>
+                            <p className="text-[10px] text-slate-500 mt-0.5">{emp.mobile_number || 'No phone'}</p>
+                          </div>
+                        </div>
                       </td>
                       <td className="px-6 py-4">
                         <p className="font-semibold text-slate-850 dark:text-white">{emp.designation}</p>
@@ -263,7 +340,11 @@ const EmployeeProfiles = () => {
                         <p className="font-medium">{emp.joining_date ? new Date(emp.joining_date).toLocaleDateString() : 'N/A'}</p>
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <span className="inline-block bg-purple-500/10 text-purple-700 dark:text-purple-300 text-[9px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full">
+                        <span className={`inline-block text-[9px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full ${
+                          (emp.employment_status || '').toLowerCase() === 'active'
+                            ? 'status-badge-active'
+                            : 'status-badge-inactive'
+                        }`}>
                           {emp.employment_status}
                         </span>
                       </td>
@@ -293,20 +374,25 @@ const EmployeeProfiles = () => {
       <div className="flex items-center justify-between">
         <button
           onClick={() => setSelectedEmployee(null)}
-          className="flex items-center space-x-2 text-xs font-bold text-slate-650 hover:text-slate-800 dark:text-slate-355 dark:hover:text-white bg-white/70 dark:bg-slate-900 border border-slate-205 dark:border-slate-805 px-4 py-2.5 rounded-xl shadow-sm transition-all hover:scale-105 active:scale-95"
+          className="flex items-center space-x-2 text-xs font-bold text-slate-655 hover:text-slate-800 dark:text-slate-350 dark:hover:text-white bg-white/70 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-4 py-2.5 rounded-xl shadow-sm transition-all hover:scale-105 active:scale-95"
         >
           <ArrowLeft size={14} />
           <span>Back to Employees Directory</span>
         </button>
+
+        <button
+          onClick={handleGenerateReport}
+          className="flex items-center space-x-2 text-xs font-bold bg-brand-600 hover:bg-brand-500 text-white px-4 py-2.5 rounded-xl shadow-md transition-all active:translate-y-[0.5px] hover:scale-105 active:scale-95"
+        >
+          <FileText size={14} />
+          <span>Generate Report</span>
+        </button>
       </div>
 
       {/* Identity Banner */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-brand-700 to-slate-800 dark:from-brand-950 dark:to-slate-900 text-white rounded-2xl p-6 shadow-xl">
-        <div className="relative z-10 flex items-center space-x-4">
-          <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center font-extrabold text-2xl border border-white/20 text-white shadow-lg">
-            {selectedEmployee.full_name[0].toUpperCase()}
-          </div>
-          <div>
+      <div className="relative overflow-hidden welcome-hero-banner bg-brand-600 dark:bg-brand-900 text-white rounded-3xl p-6 shadow-xl">
+        <div className="relative z-10 flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-6">
+          <div className="text-center sm:text-left">
             <h2 className="text-lg md:text-xl font-black">{selectedEmployee.full_name}</h2>
             <p className="text-xs text-purple-100 font-semibold mt-1">
               {selectedEmployee.designation} • Department: <span className="text-yellow-350 font-bold">{selectedEmployee.department}</span>
@@ -314,6 +400,42 @@ const EmployeeProfiles = () => {
             <p className="text-[10px] text-purple-200 mt-1">
               Employee ID: <span className="font-mono font-bold text-white">{selectedEmployee.employee_id}</span>
             </p>
+            <span className={`inline-block text-[9px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full mt-2 ${
+              (selectedEmployee.employment_status || '').toLowerCase() === 'active'
+                ? 'status-badge-active'
+                : 'status-badge-inactive'
+            }`}>
+              {selectedEmployee.employment_status}
+            </span>
+          </div>
+          <div className="relative group w-28 h-36 shrink-0 mx-auto sm:mx-0">
+            {selectedEmployee.profile_photo ? (
+              <img 
+                src={getProfilePhotoUrl(selectedEmployee.profile_photo)} 
+                alt={selectedEmployee.full_name} 
+                onClick={() => setPreviewPhoto(getProfilePhotoUrl(selectedEmployee.profile_photo))}
+                className="w-28 h-36 rounded-2xl object-cover border-2 border-white/25 shadow-lg cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-transform"
+                onError={(e) => { e.target.src = ''; }}
+              />
+            ) : (
+              <div className="w-28 h-36 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center font-extrabold text-3xl border-2 border-white/25 text-white shadow-lg">
+                {selectedEmployee.full_name[0].toUpperCase()}
+              </div>
+            )}
+            
+            {/* Show edit/upload overlay if user is admin or viewing own profile */}
+            {user && (user.role === 'admin' || user.id === selectedEmployee.user_id) && (
+              <label className="absolute inset-0 bg-black/60 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer text-white text-[10px] font-bold">
+                <Camera size={18} className="mb-1" />
+                <span>Change Photo</span>
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={handleAvatarChange} 
+                  className="hidden" 
+                />
+              </label>
+            )}
           </div>
         </div>
       </div>
@@ -462,20 +584,20 @@ const EmployeeProfiles = () => {
                   <div className="md:col-span-2 space-y-3.5">
                     <div>
                       <span className="text-[10px] uppercase font-bold text-slate-455 block mb-1">Key Achievements & Progress</span>
-                      <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed bg-slate-50/50 dark:bg-slate-950/20 border border-slate-205 dark:border-slate-805/50 p-4 rounded-xl">
+                      <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed bg-slate-50/50 dark:bg-slate-950/20 border border-slate-200 dark:border-slate-800/50 p-4 rounded-xl">
                         {weeklySummary.summary_text}
                       </p>
                     </div>
                     <div>
                       <span className="text-[10px] uppercase font-bold text-slate-455 block mb-1">Weekly Blockers / Technical Challenges</span>
-                      <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed bg-slate-50/50 dark:bg-slate-950/20 border border-slate-205 dark:border-slate-805/50 p-4 rounded-xl">
+                      <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed bg-slate-50/50 dark:bg-slate-950/20 border border-slate-200 dark:border-slate-800/50 p-4 rounded-xl">
                         {weeklySummary.blockers || "None reported."}
                       </p>
                     </div>
                   </div>
 
                   {/* Summary Sidebar Status Indicators */}
-                  <div className="space-y-4 bg-slate-50/50 dark:bg-slate-955/20 border border-slate-205/50 dark:border-slate-805/50 p-4 rounded-2xl h-fit">
+                  <div className="space-y-4 bg-slate-50/50 dark:bg-slate-950/20 border border-slate-200/50 dark:border-slate-800/50 p-4 rounded-2xl h-fit">
                     <div className="pb-3.5 border-b border-slate-200/50 dark:border-slate-850/50 flex justify-between items-center">
                       <div>
                         <span className="text-[9px] uppercase font-bold text-slate-455 block">Sentiment Analysis</span>
@@ -699,6 +821,30 @@ const EmployeeProfiles = () => {
                 })()}
               </div>
             </div>
+          </div>
+        </div>
+      )}
+      {/* Photo Preview Modal Lightbox */}
+      {previewPhoto && (
+        <div 
+          onClick={() => setPreviewPhoto(null)}
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-md cursor-zoom-out p-4 page-fade-in"
+        >
+          <div 
+            className="relative max-w-2xl w-full bg-white/5 border border-white/10 p-2 rounded-3xl pop-bounce shadow-2xl overflow-hidden" 
+            onClick={e => e.stopPropagation()}
+          >
+            <button 
+              onClick={() => setPreviewPhoto(null)}
+              className="absolute top-4 right-4 z-50 p-2 rounded-full bg-black/60 hover:bg-black/80 text-white transition-all shadow-md"
+            >
+              <X size={18} />
+            </button>
+            <img 
+              src={previewPhoto} 
+              alt="Profile Full Preview" 
+              className="w-full h-auto max-h-[80vh] object-contain rounded-2xl bg-slate-950 p-2"
+            />
           </div>
         </div>
       )}

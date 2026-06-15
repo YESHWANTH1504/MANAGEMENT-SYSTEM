@@ -290,3 +290,296 @@ def add_report_comment(
     db.refresh(new_comment)
     return new_comment
 
+
+@router.get("/user/{user_id}/download-pdf")
+def download_accomplishment_report(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(deps.get_current_user)
+):
+    """
+    Generate and download a PDF report containing all tasks and accomplishments done by the user.
+    """
+    # Authorization: User must be admin or requesting their own report
+    if current_user.role != "admin" and current_user.id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to view or download this report"
+        )
+
+    # Fetch User
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+
+    # Resolve candidate details
+    candidate_name = ""
+    role_label = user.role.title()
+    details = {}
+
+    if user.role == "intern":
+        intern = db.query(models.Intern).filter(models.Intern.user_id == user_id).first()
+        if intern:
+            candidate_name = intern.full_name
+            details = {
+                "Internship ID": intern.internship_id,
+                "Domain": intern.internship_domain,
+                "College Name": intern.college_name,
+                "Duration": f"{intern.start_date} to {intern.end_date or 'Present'}"
+            }
+    elif user.role == "employee":
+        employee = db.query(models.Employee).filter(models.Employee.user_id == user_id).first()
+        if employee:
+            candidate_name = employee.full_name
+            details = {
+                "Employee ID": employee.employee_id,
+                "Designation": employee.designation,
+                "Department": employee.department,
+                "Mobile Number": employee.mobile_number or "N/A"
+            }
+
+    if not candidate_name:
+        candidate_name = user.email.split("@")[0].title()
+        details = {"Email": user.email}
+
+    # Fetch all reports
+    reports = db.query(models.DailyReport).filter(
+        models.DailyReport.user_id == user_id
+    ).order_by(models.DailyReport.date.asc()).all()
+
+    # Import ReportLab inside function to ensure isolation
+    try:
+        from fastapi.responses import StreamingResponse
+        from io import BytesIO
+        from reportlab.lib.pagesizes import letter
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.lib import colors
+    except ImportError:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="PDF generation library is not configured properly"
+        )
+
+    # Helper function to escape text for ReportLab's XML parser
+    def xml_escape(text: str) -> str:
+        if not text:
+            return ""
+        return str(text).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;").replace("'", "&apos;")
+
+    # Generate PDF in memory
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=letter,
+        rightMargin=36,
+        leftMargin=36,
+        topMargin=36,
+        bottomMargin=36
+    )
+    story = []
+    styles = getSampleStyleSheet()
+
+    # Branding colors matching the UI/UX: `#1c4d5e` (dark blue) and `#b6e9fc` (light blue)
+    primary_color = colors.HexColor("#1c4d5e")
+    text_color = colors.HexColor("#334155")
+
+    title_style = ParagraphStyle(
+        'TitleStyle',
+        parent=styles['Heading1'],
+        fontName='Helvetica-Bold',
+        fontSize=18,
+        textColor=primary_color,
+        spaceAfter=12,
+        alignment=1  # Center
+    )
+
+    section_heading = ParagraphStyle(
+        'SectionHeading',
+        parent=styles['Heading2'],
+        fontName='Helvetica-Bold',
+        fontSize=12,
+        textColor=primary_color,
+        spaceBefore=14,
+        spaceAfter=6
+    )
+
+    normal_style = ParagraphStyle(
+        'NormalStyle',
+        parent=styles['Normal'],
+        fontName='Helvetica',
+        fontSize=9,
+        textColor=text_color,
+        leading=11
+    )
+
+    header_style = ParagraphStyle(
+        'HeaderStyle',
+        parent=styles['Normal'],
+        fontName='Helvetica-Bold',
+        fontSize=9,
+        textColor=colors.white,
+        leading=11
+    )
+
+    meta_label_style = ParagraphStyle(
+        'MetaLabel',
+        parent=styles['Normal'],
+        fontName='Helvetica-Bold',
+        fontSize=9,
+        textColor=primary_color
+    )
+
+    story.append(Paragraph("Candidate Accomplishment Report", title_style))
+    story.append(Spacer(1, 8))
+
+    # Resolve profile photo path
+    import os
+    from app.core.config import settings
+    from reportlab.platypus import Image
+    
+    photo_name = None
+    if user.role == "intern" and intern:
+        photo_name = intern.profile_photo
+    elif user.role == "employee" and employee:
+        photo_name = employee.profile_photo
+
+    photo_path = None
+    if photo_name:
+        resolved_path = os.path.join(settings.UPLOAD_DIR, photo_name)
+        if os.path.exists(resolved_path):
+            photo_path = resolved_path
+
+    photo_flowable = None
+    if photo_path:
+        try:
+            photo_flowable = Image(photo_path, width=70, height=90)
+            # Add a border to the image
+            photo_table = Table([[photo_flowable]], colWidths=[74], rowHeights=[94])
+            photo_table.setStyle(TableStyle([
+                ('BOX', (0,0), (-1,-1), 1, primary_color),
+                ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+                ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 1),
+                ('TOPPADDING', (0,0), (-1,-1), 1),
+                ('LEFTPADDING', (0,0), (-1,-1), 1),
+                ('RIGHTPADDING', (0,0), (-1,-1), 1),
+            ]))
+            photo_flowable = photo_table
+        except Exception as e:
+            print(f"Error loading image in PDF: {e}")
+            photo_flowable = None
+
+    if not photo_flowable:
+        # Placeholder box
+        placeholder_text = Paragraph("<font color='#94a3b8' size='8'><b>PASSPORT PHOTO</b></font>", normal_style)
+        photo_table = Table([[placeholder_text]], colWidths=[74], rowHeights=[94])
+        photo_table.setStyle(TableStyle([
+            ('BOX', (0,0), (-1,-1), 1, colors.HexColor("#cbd5e1")),
+            ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+            ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#f8fafc")),
+        ]))
+        photo_flowable = photo_table
+
+    # Details table
+    meta_data = [
+        [Paragraph("Candidate Name:", meta_label_style), Paragraph(xml_escape(candidate_name), normal_style),
+         Paragraph("Role / Type:", meta_label_style), Paragraph(xml_escape(role_label), normal_style)],
+    ]
+    for key, val in details.items():
+        meta_data.append([
+            Paragraph(xml_escape(key) + ":", meta_label_style), Paragraph(xml_escape(val), normal_style),
+            Paragraph("", meta_label_style), Paragraph("", normal_style)
+        ])
+
+    meta_table = Table(meta_data, colWidths=[100, 130, 80, 120])
+    meta_table.setStyle(TableStyle([
+        ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 4),
+        ('TOPPADDING', (0,0), (-1,-1), 4),
+    ]))
+
+    # Master Header Layout Table
+    header_layout_data = [[meta_table, photo_flowable]]
+    header_layout_table = Table(header_layout_data, colWidths=[440, 80])
+    header_layout_table.setStyle(TableStyle([
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('LEFTPADDING', (0,0), (-1,-1), 0),
+        ('RIGHTPADDING', (0,0), (-1,-1), 0),
+        ('TOPPADDING', (0,0), (-1,-1), 0),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 0),
+        ('LINEBELOW', (0,0), (-1,-1), 1, primary_color),
+    ]))
+    story.append(header_layout_table)
+    story.append(Spacer(1, 12))
+
+    # Section accomplishments
+    story.append(Paragraph("Tasks & Accomplishments Logs", section_heading))
+    story.append(Spacer(1, 6))
+
+    if not reports:
+        story.append(Paragraph("No daily report logs have been submitted by this candidate yet.", normal_style))
+    else:
+        # Table of accomplishments
+        table_data = [
+            [
+                Paragraph("Date", header_style),
+                Paragraph("Task Title & Description", header_style),
+                Paragraph("Hours", header_style),
+                Paragraph("Tech Stack", header_style),
+                Paragraph("Status", header_style)
+            ]
+        ]
+
+        for rep in reports:
+            date_str = rep.date.strftime("%Y-%m-%d") if hasattr(rep.date, "strftime") else str(rep.date)
+            
+            task_title_esc = xml_escape(rep.task_title)
+            desc_esc = xml_escape(rep.description)
+            
+            task_desc = f"<b>{task_title_esc}</b><br/>{desc_esc}"
+            if rep.tomorrow_plan:
+                plan_esc = xml_escape(rep.tomorrow_plan)
+                task_desc += f"<br/><i>Next Steps: {plan_esc}</i>"
+
+            techs = xml_escape(rep.technologies_used or "N/A")
+            status_lbl = xml_escape(rep.status.upper())
+
+            table_data.append([
+                Paragraph(date_str, normal_style),
+                Paragraph(task_desc, normal_style),
+                Paragraph(f"{rep.hours_worked:.1f}", normal_style),
+                Paragraph(techs, normal_style),
+                Paragraph(status_lbl, normal_style)
+            ])
+
+        # Printable width: Letter width is 612, minus margins of 36 on each side = 540 total width.
+        col_widths = [65, 275, 35, 110, 55]
+        t = Table(table_data, colWidths=col_widths, repeatRows=1)
+        t.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (-1,0), primary_color),
+            ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+            ('VALIGN', (0,0), (-1,-1), 'TOP'),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+            ('TOPPADDING', (0,0), (-1,-1), 6),
+            ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, colors.HexColor("#f8fafc")]),
+            ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor("#cbd5e1")),
+        ]))
+        story.append(t)
+
+    doc.build(story)
+    buffer.seek(0)
+
+    filename = f"accomplishment_report_{user_id}_{datetime.date.today()}.pdf"
+    return StreamingResponse(
+        buffer,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
+

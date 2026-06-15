@@ -105,7 +105,7 @@ const InternDashboard = () => {
   return (
     <div className="space-y-6">
       {/* Welcome Hero Banner */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-brand-700 to-slate-800 dark:from-brand-950 dark:to-slate-900 text-white rounded-xl p-6 md:p-8 shadow-sm">
+      <div className="relative overflow-hidden welcome-hero-banner bg-brand-600 dark:bg-brand-900 text-white rounded-3xl p-6 md:p-8 shadow-sm">
         <div className="absolute right-0 bottom-0 top-0 w-1/3 opacity-15 pointer-events-none hidden md:block">
           <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M0 100 C 20 80, 40 80, 60 100 C 80 120, 100 100, 100 100 L 100 0 L 0 0 Z" fill="white"/>
@@ -153,7 +153,7 @@ const InternDashboard = () => {
             <button
               onClick={handleCheckIn}
               disabled={!!attendance}
-              className={`flex-1 md:flex-none text-xs px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 disabled:from-emerald-600/30 disabled:to-teal-500/30 text-white font-bold rounded-xl btn-animate shadow-md hover:shadow-emerald-500/10 flex items-center justify-center space-x-2 border border-emerald-500/20 ${!attendance ? 'pulse-halo' : ''}`}
+              className={`flex-1 md:flex-none text-xs px-6 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-600/30 text-white font-bold rounded-full btn-animate shadow-md hover:shadow-emerald-500/10 flex items-center justify-center space-x-2 border border-emerald-500/20 ${!attendance ? 'pulse-halo' : ''}`}
             >
               <CheckCircle2 size={16} />
               <span>Check In</span>
@@ -161,7 +161,7 @@ const InternDashboard = () => {
             <button
               onClick={handleCheckOut}
               disabled={!attendance || !!attendance.check_out_time}
-              className={`flex-1 md:flex-none text-xs px-6 py-3 bg-gradient-to-r from-rose-600 to-red-500 hover:from-rose-500 hover:to-red-400 disabled:from-rose-600/30 disabled:to-red-500/30 text-white font-bold rounded-xl btn-animate shadow-md hover:shadow-red-500/10 flex items-center justify-center space-x-2 border border-red-500/20 ${attendance && !attendance.check_out_time ? 'pulse-halo' : ''}`}
+              className={`flex-1 md:flex-none text-xs px-6 py-3 bg-rose-600 hover:bg-rose-700 disabled:bg-rose-600/30 text-white font-bold rounded-full btn-animate shadow-md hover:shadow-red-500/10 flex items-center justify-center space-x-2 border border-red-500/20 ${attendance && !attendance.check_out_time ? 'pulse-halo' : ''}`}
             >
               <X size={16} />
               <span>Check Out</span>

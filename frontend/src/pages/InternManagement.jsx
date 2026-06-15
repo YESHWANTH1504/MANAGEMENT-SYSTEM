@@ -11,21 +11,43 @@ import { useToast } from '../context/ToastContext';
 const InternManagement = () => {
   const navigate = useNavigate();
   const { showToast, confirm } = useToast();
+  
+  const getProfilePhotoUrl = (photoName) => {
+    if (!photoName) return '';
+    if (photoName.startsWith('http://') || photoName.startsWith('https://')) return photoName;
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+    const BASE_URL = API_URL.replace('/api/v1', '');
+    return `${BASE_URL}/static/uploads/${photoName}`;
+  };
+
   const [interns, setInterns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDomain, setSelectedDomain] = useState('');
+  const [sortBy, setSortBy] = useState('name');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   
+  const [customDomain, setCustomDomain] = useState('');
+  const [customEditDomain, setCustomEditDomain] = useState('');
+
+  const PREDEFINED_DOMAINS = [
+    'Web Development',
+    'Mobile App Development',
+    'Data Science',
+    'AI / Machine Learning',
+    'Cloud Engineering'
+  ];
+  const isPredefinedDomain = (domain) => PREDEFINED_DOMAINS.includes(domain);
+  
   // Forms State
   const [addForm, setAddForm] = useState({
-    email: '', password: 'Password123', internship_id: '',
-    full_name: '', mobile_number: '', gender: 'Male',
+    email: '', password: '', internship_id: '',
+    full_name: '', mobile_number: '', gender: '',
     college_name: '', degree: '', department: '',
-    internship_domain: 'Web Development',
-    start_date: new Date().toISOString().split('T')[0],
-    end_date: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 90 days default
+    internship_domain: '',
+    start_date: '',
+    end_date: '',
     programming_languages: '', frameworks: '', tools_used: '', databases_used: ''
   });
 
@@ -46,14 +68,30 @@ const InternManagement = () => {
     loadData();
   }, []);
 
-  // Filtered interns list
-  const filteredInterns = interns.filter(i => {
-    const matchesSearch = i.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          i.internship_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          (i.college_name || '').toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesDomain = selectedDomain ? i.internship_domain === selectedDomain : true;
-    return matchesSearch && matchesDomain;
-  });
+  // Filtered and sorted interns list
+  const sortedInterns = [...interns]
+    .filter(i => {
+      const matchesSearch = i.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            i.internship_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            (i.college_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            (i.internship_domain || '').toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesDomain = selectedDomain ? i.internship_domain === selectedDomain : true;
+      return matchesSearch && matchesDomain;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'name') {
+        return a.full_name.localeCompare(b.full_name);
+      } else if (sortBy === 'id') {
+        return a.internship_id.localeCompare(b.internship_id);
+      } else if (sortBy === 'domain') {
+        return (a.internship_domain || '').localeCompare(b.internship_domain || '');
+      } else if (sortBy === 'college') {
+        return (a.college_name || '').localeCompare(b.college_name || '');
+      } else if (sortBy === 'date') {
+        return (a.start_date || '').localeCompare(b.start_date || '');
+      }
+      return 0;
+    });
 
   // Handle Input Changes
   const handleAddChange = (e) => {
@@ -71,19 +109,23 @@ const InternManagement = () => {
     e.preventDefault();
     try {
       const payload = { ...addForm };
+      if (payload.internship_domain === 'Others') {
+        payload.internship_domain = customDomain || 'Others';
+      }
       Object.keys(payload).forEach(k => {
         if (payload[k] === '') payload[k] = null;
       });
       await api.post('/interns/', payload);
       setShowAddModal(false);
       // Reset form
+      setCustomDomain('');
       setAddForm({
-        email: '', password: 'Password123', internship_id: '',
-        full_name: '', mobile_number: '', gender: 'Male',
+        email: '', password: '', internship_id: '',
+        full_name: '', mobile_number: '', gender: '',
         college_name: '', degree: '', department: '',
-        internship_domain: 'Web Development',
-        start_date: new Date().toISOString().split('T')[0],
-        end_date: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        internship_domain: '',
+        start_date: '',
+        end_date: '',
         programming_languages: '', frameworks: '', tools_used: '', databases_used: ''
       });
       loadData();
@@ -95,7 +137,12 @@ const InternManagement = () => {
 
   // Edit action
   const startEdit = (intern) => {
-    setEditForm({ ...intern });
+    const isPredefined = isPredefinedDomain(intern.internship_domain);
+    setEditForm({
+      ...intern,
+      internship_domain: isPredefined ? intern.internship_domain : 'Others'
+    });
+    setCustomEditDomain(isPredefined ? '' : intern.internship_domain);
     setShowEditModal(true);
   };
 
@@ -104,11 +151,15 @@ const InternManagement = () => {
     e.preventDefault();
     try {
       const payload = { ...editForm };
+      if (payload.internship_domain === 'Others') {
+        payload.internship_domain = customEditDomain || 'Others';
+      }
       Object.keys(payload).forEach(k => {
         if (payload[k] === '') payload[k] = null;
       });
       await api.put(`/interns/${editForm.id}`, payload);
       setShowEditModal(false);
+      setCustomEditDomain('');
       loadData();
       showToast('Intern details updated successfully.', 'success');
     } catch (err) {
@@ -163,6 +214,17 @@ const InternManagement = () => {
             <option value="AI / Machine Learning">AI / ML</option>
             <option value="Cloud Engineering">Cloud Engineering</option>
           </select>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="text-xs px-3 py-2.5 bg-slate-100/50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-brand-500 dark:text-white"
+          >
+            <option value="name">Sort by Name</option>
+            <option value="id">Sort by ID</option>
+            <option value="domain">Sort by Domain</option>
+            <option value="college">Sort by College</option>
+            <option value="date">Sort by Date</option>
+          </select>
         </div>
 
         <button
@@ -194,17 +256,32 @@ const InternManagement = () => {
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500 mx-auto"></div>
                   </td>
                 </tr>
-              ) : filteredInterns.length === 0 ? (
+              ) : sortedInterns.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="text-center py-12 text-slate-500">No intern records found.</td>
                 </tr>
               ) : (
-                filteredInterns.map((intern) => (
+                sortedInterns.map((intern) => (
                   <tr key={intern.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20">
                     <td className="px-6 py-4 font-mono font-bold text-brand-600 dark:text-brand-400">{intern.internship_id}</td>
                     <td className="px-6 py-4">
-                      <p className="font-bold text-slate-800 dark:text-white">{intern.full_name}</p>
-                      <p className="text-[10px] text-slate-500 mt-0.5">{intern.mobile_number || 'No phone'}</p>
+                      <div className="flex items-center space-x-3">
+                        {intern.profile_photo ? (
+                          <img 
+                            src={getProfilePhotoUrl(intern.profile_photo)} 
+                            alt={intern.full_name} 
+                            className="w-9 h-9 rounded-xl object-cover border border-slate-200 dark:border-slate-800 shadow-sm"
+                          />
+                        ) : (
+                          <div className="w-9 h-9 rounded-xl bg-purple-500/10 dark:bg-purple-550/15 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-sm border border-purple-500/20">
+                            {intern.full_name[0].toUpperCase()}
+                          </div>
+                        )}
+                        <div>
+                          <p className="font-bold text-slate-800 dark:text-white">{intern.full_name}</p>
+                          <p className="text-[10px] text-slate-500 mt-0.5">{intern.mobile_number || 'No phone'}</p>
+                        </div>
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <p className="font-semibold text-slate-800 dark:text-white">{intern.internship_domain}</p>
@@ -250,10 +327,10 @@ const InternManagement = () => {
       {/* 📝 REGISTER MODAL */}
       {showAddModal && (
         <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-3xl overflow-hidden shadow-2xl relative max-h-[90vh] flex flex-col">
+          <div className="glass-card border border-slate-200 dark:border-slate-800 w-full max-w-3xl overflow-hidden shadow-2xl relative max-h-[90vh] flex flex-col">
             <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center shrink-0">
               <h3 className="font-bold text-slate-800 dark:text-white">Register New Intern Profile</h3>
-              <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-white bg-slate-100 dark:bg-slate-800 p-1.5 rounded-lg">
+              <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-slate-200 dark:hover:text-white bg-transparent hover:bg-slate-500/20 p-1.5 rounded-lg">
                 <X size={16} />
               </button>
             </div>
@@ -288,6 +365,7 @@ const InternManagement = () => {
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Gender</label>
                   <select name="gender" value={addForm.gender} onChange={handleAddChange} className="w-full text-xs px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl dark:text-white">
+                    <option value="">Select Gender</option>
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
                     <option value="Other">Other</option>
@@ -315,13 +393,28 @@ const InternManagement = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Internship Domain</label>
-                  <select name="internship_domain" value={addForm.internship_domain} onChange={handleAddChange} className="w-full text-xs px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl dark:text-white">
+                  <select name="internship_domain" value={addForm.internship_domain} onChange={handleAddChange} className="w-full text-xs px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-800 dark:text-white">
+                    <option value="">Select Domain</option>
                     <option value="Web Development">Web Development</option>
                     <option value="Mobile App Development">Mobile App Development</option>
                     <option value="Data Science">Data Science</option>
                     <option value="AI / Machine Learning">AI / Machine Learning</option>
                     <option value="Cloud Engineering">Cloud Engineering</option>
+                    <option value="Others">Others</option>
                   </select>
+                  {addForm.internship_domain === 'Others' && (
+                    <div className="space-y-1 mt-1.5 animate-slide-up">
+                      <label className="text-[9px] font-bold text-brand-600 dark:text-brand-400 uppercase">Specify Domain</label>
+                      <input 
+                        type="text" 
+                        required 
+                        value={customDomain} 
+                        onChange={(e) => setCustomDomain(e.target.value)} 
+                        placeholder="e.g. Cyber Security" 
+                        className="w-full text-xs px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg dark:text-white" 
+                      />
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">End Date</label>
@@ -345,8 +438,8 @@ const InternManagement = () => {
                 </div>
               </div>
 
-              <div className="pt-4 flex justify-end space-x-2 shrink-0 border-t border-slate-200 dark:border-slate-800">
-                <button type="button" onClick={() => setShowAddModal(false)} className="text-xs px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold rounded-xl transition-all">Cancel</button>
+              <div className="pt-4 flex justify-end space-x-2 shrink-0 border-t border-slate-205 dark:border-slate-795">
+                <button type="button" onClick={() => setShowAddModal(false)} className="text-xs px-4 py-2.5 bg-transparent border border-slate-300 dark:border-slate-700 hover:bg-slate-500/10 font-bold rounded-xl transition-all">Cancel</button>
                 <button type="submit" className="text-xs px-5 py-2.5 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-xl shadow shadow-brand-600/10 transition-all">Save Profile</button>
               </div>
             </form>
@@ -357,10 +450,10 @@ const InternManagement = () => {
       {/* ✏️ EDIT MODAL */}
       {showEditModal && editForm && (
         <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-3xl overflow-hidden shadow-2xl relative max-h-[90vh] flex flex-col">
+          <div className="glass-card border border-slate-200 dark:border-slate-800 w-full max-w-3xl overflow-hidden shadow-2xl relative max-h-[90vh] flex flex-col">
             <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center shrink-0">
               <h3 className="font-bold text-slate-800 dark:text-white">Edit Intern details - {editForm.internship_id}</h3>
-              <button onClick={() => setShowEditModal(false)} className="text-slate-400 hover:text-white bg-slate-100 dark:bg-slate-800 p-1.5 rounded-lg">
+              <button onClick={() => setShowEditModal(false)} className="text-slate-400 hover:text-slate-200 dark:hover:text-white bg-transparent hover:bg-slate-500/20 p-1.5 rounded-lg">
                 <X size={16} />
               </button>
             </div>
@@ -390,13 +483,27 @@ const InternManagement = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Internship Domain</label>
-                  <select name="internship_domain" value={editForm.internship_domain || ''} onChange={handleEditChange} className="w-full text-xs px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl dark:text-white">
+                  <select name="internship_domain" value={editForm.internship_domain || ''} onChange={handleEditChange} className="w-full text-xs px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-800 dark:text-white">
                     <option value="Web Development">Web Development</option>
                     <option value="Mobile App Development">Mobile App Development</option>
                     <option value="Data Science">Data Science</option>
                     <option value="AI / Machine Learning">AI / Machine Learning</option>
                     <option value="Cloud Engineering">Cloud Engineering</option>
+                    <option value="Others">Others</option>
                   </select>
+                  {editForm.internship_domain === 'Others' && (
+                    <div className="space-y-1 mt-1.5 animate-slide-up">
+                      <label className="text-[9px] font-bold text-brand-600 dark:text-brand-400 uppercase">Specify Domain</label>
+                      <input 
+                        type="text" 
+                        required 
+                        value={customEditDomain} 
+                        onChange={(e) => setCustomEditDomain(e.target.value)} 
+                        placeholder="e.g. Cyber Security" 
+                        className="w-full text-xs px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg dark:text-white" 
+                      />
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Project Name</label>
@@ -404,8 +511,8 @@ const InternManagement = () => {
                 </div>
               </div>
 
-              <div className="pt-4 flex justify-end space-x-2 shrink-0 border-t border-slate-200 dark:border-slate-800">
-                <button type="button" onClick={() => setShowEditModal(false)} className="text-xs px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold rounded-xl transition-all">Cancel</button>
+              <div className="pt-4 flex justify-end space-x-2 shrink-0 border-t border-slate-205 dark:border-slate-795">
+                <button type="button" onClick={() => setShowEditModal(false)} className="text-xs px-4 py-2.5 bg-transparent border border-slate-300 dark:border-slate-700 hover:bg-slate-500/10 font-bold rounded-xl transition-all">Cancel</button>
                 <button type="submit" className="text-xs px-5 py-2.5 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-xl shadow shadow-brand-600/10 transition-all">Update Record</button>
               </div>
             </form>

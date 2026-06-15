@@ -1,0 +1,21 @@
+{
+  "short_name": "MCC IMMS",
+  "name": "MCC MRF Innovation Park Management System",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/logo.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#b6e9fc",
+  "theme_color": "#1c4d5e",
+  "display": "standalone",
+  "orientation": "portrait"
+}

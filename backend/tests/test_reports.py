@@ -142,3 +142,63 @@ def test_profile_access(client, db_session):
     )
     assert res_emp_detail.status_code == 200
 
+
+def test_download_accomplishment_report(client, db_session):
+    # 1. Log in as intern
+    res_login_intern = client.post("/api/v1/auth/login-json", json={
+        "email": "intern@example.com",
+        "password": "internpassword123"
+    })
+    intern_token = res_login_intern.json()["access_token"]
+
+    # Get user IDs directly from DB
+    intern_user = db_session.query(models.User).filter(models.User.email == "intern@example.com").first()
+    intern_user_id = intern_user.id
+
+    # Log in as employee
+    res_login_employee = client.post("/api/v1/auth/login-json", json={
+        "email": "employee@example.com",
+        "password": "employeepassword123"
+    })
+    employee_token = res_login_employee.json()["access_token"]
+
+    employee_user = db_session.query(models.User).filter(models.User.email == "employee@example.com").first()
+    employee_user_id = employee_user.id
+
+    # 2. Submit a report as Intern first
+    report_data = {
+        "date": "2026-06-11",
+        "task_title": "Completed UI Integration",
+        "description": "Finished implementing custom profile photo adjustments and responsive alignment rules.",
+        "hours_worked": 6.5,
+        "technologies_used": "React, Tailwind, CSS",
+        "challenges_faced": "None",
+        "learning_outcomes": "Responsive styles",
+        "tomorrow_plan": "Add report downloads",
+        "additional_notes": ""
+    }
+    res_report = client.post(
+        "/api/v1/reports/",
+        json=report_data,
+        headers={"Authorization": f"Bearer {intern_token}"}
+    )
+    assert res_report.status_code == 200
+
+    # 3. Download the report as Intern - should be allowed (200 OK)
+    res_pdf = client.get(
+        f"/api/v1/reports/user/{intern_user_id}/download-pdf",
+        headers={"Authorization": f"Bearer {intern_token}"}
+    )
+    assert res_pdf.status_code == 200
+    assert res_pdf.headers["content-type"] == "application/pdf"
+    assert "attachment" in res_pdf.headers["content-disposition"]
+    assert len(res_pdf.content) > 0
+
+    # 4. Try to download Intern's report as Employee - should be denied (403 Forbidden)
+    res_pdf_forbidden = client.get(
+        f"/api/v1/reports/user/{intern_user_id}/download-pdf",
+        headers={"Authorization": f"Bearer {employee_token}"}
+    )
+    assert res_pdf_forbidden.status_code == 403
+
+
