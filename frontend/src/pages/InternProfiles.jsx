@@ -342,14 +342,14 @@ const InternProfiles = () => {
                       <td className="px-6 py-4 font-mono font-bold text-purple-600 dark:text-purple-400">{intern.internship_id}</td>
                       <td className="px-6 py-4">
                         <div className="flex items-center space-x-3">
-                          {intern.profile_photo ? (
+                           {intern.profile_photo ? (
                             <img 
                               src={getProfilePhotoUrl(intern.profile_photo)} 
                               alt={intern.full_name} 
-                              className="w-9 h-9 rounded-xl object-cover border border-slate-200 dark:border-slate-800 shadow-sm"
+                              className="w-9 h-9 rounded-full object-cover border border-slate-200 dark:border-slate-800 shadow-sm"
                             />
                           ) : (
-                            <div className="w-9 h-9 rounded-xl bg-purple-500/10 dark:bg-purple-550/15 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-sm border border-purple-500/20">
+                            <div className="w-9 h-9 rounded-full bg-purple-500/10 dark:bg-purple-550/15 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-sm border border-purple-500/20">
                               {intern.full_name[0].toUpperCase()}
                             </div>
                           )}
@@ -436,24 +436,24 @@ const InternProfiles = () => {
               {selectedIntern.internship_status}
             </span>
           </div>
-          <div className="relative group w-28 h-36 shrink-0 mx-auto sm:mx-0">
+          <div className="relative group w-32 h-32 shrink-0 mx-auto sm:mx-0">
             {selectedIntern.profile_photo ? (
               <img 
                 src={getProfilePhotoUrl(selectedIntern.profile_photo)} 
                 alt={selectedIntern.full_name} 
                 onClick={() => setPreviewPhoto(getProfilePhotoUrl(selectedIntern.profile_photo))}
-                className="w-28 h-36 rounded-2xl object-cover border-2 border-white/25 shadow-lg cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-transform"
+                className="w-32 h-32 rounded-full object-cover border-2 border-white/25 shadow-lg cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-transform"
                 onError={(e) => { e.target.src = ''; }}
               />
             ) : (
-              <div className="w-28 h-36 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center font-extrabold text-3xl border-2 border-white/25 text-white shadow-lg">
+              <div className="w-32 h-32 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center font-extrabold text-3xl border-2 border-white/25 text-white shadow-lg">
                 {selectedIntern.full_name[0].toUpperCase()}
               </div>
             )}
             
             {/* Show edit/upload overlay if user is admin or viewing own profile */}
             {user && (user.role === 'admin' || user.id === selectedIntern.user_id) && (
-              <label className="absolute inset-0 bg-black/60 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer text-white text-[10px] font-bold">
+              <label className="absolute inset-0 bg-black/60 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer text-white text-[10px] font-bold">
                 <Camera size={18} className="mb-1" />
                 <span>Change Photo</span>
                 <input 

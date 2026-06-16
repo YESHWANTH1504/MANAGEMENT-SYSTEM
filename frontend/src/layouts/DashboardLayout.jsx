@@ -453,7 +453,7 @@ const DashboardLayout = ({ children }) => {
         {/* Sidebar User Footer */}
         <div className="p-4 border-t border-brand-700/40 dark:border-white/10 flex flex-col space-y-3">
           <div className="flex items-center space-x-3 px-2 overflow-hidden">
-            <div className="w-11 h-11 rounded-2xl bg-brand-700/50 dark:bg-white/10 flex items-center justify-center text-brand-100 dark:text-white border-2 border-white/20 dark:border-white/10 overflow-hidden shrink-0 shadow-md">
+            <div className="w-11 h-11 rounded-full bg-brand-700/50 dark:bg-white/10 flex items-center justify-center text-brand-100 dark:text-white border-2 border-white/20 dark:border-white/10 overflow-hidden shrink-0 shadow-md">
               {user?.profile?.profile_photo ? (
                 <img 
                   src={getProfilePhotoUrl(user.profile.profile_photo)} 

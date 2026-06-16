@@ -270,10 +270,10 @@ const InternManagement = () => {
                           <img 
                             src={getProfilePhotoUrl(intern.profile_photo)} 
                             alt={intern.full_name} 
-                            className="w-9 h-9 rounded-xl object-cover border border-slate-200 dark:border-slate-800 shadow-sm"
+                            className="w-9 h-9 rounded-full object-cover border border-slate-200 dark:border-slate-800 shadow-sm"
                           />
                         ) : (
-                          <div className="w-9 h-9 rounded-xl bg-purple-500/10 dark:bg-purple-550/15 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-sm border border-purple-500/20">
+                          <div className="w-9 h-9 rounded-full bg-purple-500/10 dark:bg-purple-550/15 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-sm border border-purple-500/20">
                             {intern.full_name[0].toUpperCase()}
                           </div>
                         )}

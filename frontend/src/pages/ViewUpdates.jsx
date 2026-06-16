@@ -278,10 +278,10 @@ const ViewUpdates = () => {
                     <img
                       src={getProfilePhotoUrl(userPhotoMap[report.user_id])}
                       alt={report.user_name}
-                      className="w-10 h-10 rounded-xl object-cover border border-slate-200 dark:border-slate-700 shadow-sm shrink-0"
+                      className="w-10 h-10 rounded-full object-cover border border-slate-200 dark:border-slate-700 shadow-sm shrink-0"
                     />
                   ) : (
-                    <div className="w-10 h-10 rounded-xl bg-brand-500/10 text-brand-600 dark:text-brand-400 border border-brand-500/25 flex items-center justify-center font-bold text-sm shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400 border border-brand-500/25 flex items-center justify-center font-bold text-sm shrink-0">
                       {(report.user_name || 'U')[0].toUpperCase()}
                     </div>
                   )}

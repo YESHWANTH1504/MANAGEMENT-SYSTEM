@@ -316,10 +316,10 @@ const EmployeeProfiles = () => {
                             <img 
                               src={getProfilePhotoUrl(emp.profile_photo)} 
                               alt={emp.full_name} 
-                              className="w-9 h-9 rounded-xl object-cover border border-slate-200 dark:border-slate-800 shadow-sm"
+                              className="w-9 h-9 rounded-full object-cover border border-slate-200 dark:border-slate-800 shadow-sm"
                             />
                           ) : (
-                            <div className="w-9 h-9 rounded-xl bg-purple-500/10 dark:bg-purple-550/15 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-sm border border-purple-500/20">
+                            <div className="w-9 h-9 rounded-full bg-purple-500/10 dark:bg-purple-550/15 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-sm border border-purple-500/20">
                               {emp.full_name[0].toUpperCase()}
                             </div>
                           )}
@@ -408,24 +408,24 @@ const EmployeeProfiles = () => {
               {selectedEmployee.employment_status}
             </span>
           </div>
-          <div className="relative group w-28 h-36 shrink-0 mx-auto sm:mx-0">
+          <div className="relative group w-32 h-32 shrink-0 mx-auto sm:mx-0">
             {selectedEmployee.profile_photo ? (
               <img 
                 src={getProfilePhotoUrl(selectedEmployee.profile_photo)} 
                 alt={selectedEmployee.full_name} 
                 onClick={() => setPreviewPhoto(getProfilePhotoUrl(selectedEmployee.profile_photo))}
-                className="w-28 h-36 rounded-2xl object-cover border-2 border-white/25 shadow-lg cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-transform"
+                className="w-32 h-32 rounded-full object-cover border-2 border-white/25 shadow-lg cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-transform"
                 onError={(e) => { e.target.src = ''; }}
               />
             ) : (
-              <div className="w-28 h-36 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center font-extrabold text-3xl border-2 border-white/25 text-white shadow-lg">
+              <div className="w-32 h-32 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center font-extrabold text-3xl border-2 border-white/25 text-white shadow-lg">
                 {selectedEmployee.full_name[0].toUpperCase()}
               </div>
             )}
             
             {/* Show edit/upload overlay if user is admin or viewing own profile */}
             {user && (user.role === 'admin' || user.id === selectedEmployee.user_id) && (
-              <label className="absolute inset-0 bg-black/60 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer text-white text-[10px] font-bold">
+              <label className="absolute inset-0 bg-black/60 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer text-white text-[10px] font-bold">
                 <Camera size={18} className="mb-1" />
                 <span>Change Photo</span>
                 <input 

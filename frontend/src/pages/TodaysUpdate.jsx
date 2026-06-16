@@ -557,10 +557,10 @@ const TodaysUpdate = () => {
                       <img
                         src={getProfilePhotoUrl(selectedProfile.profile_photo)}
                         alt={selectedProfile.name}
-                        className="w-12 h-12 rounded-xl object-cover border border-slate-200 dark:border-slate-700 shadow-sm shrink-0"
+                        className="w-12 h-12 rounded-full object-cover border border-slate-200 dark:border-slate-700 shadow-sm shrink-0"
                       />
                     ) : (
-                      <div className="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-lg shrink-0">
+                      <div className="w-12 h-12 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-lg shrink-0">
                         {selectedProfile.name[0].toUpperCase()}
                       </div>
                     )}
