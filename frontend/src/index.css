@@ -3,7 +3,19 @@
 @tailwind utilities;
 
 html {
-  font-size: 19px;
+  font-size: 15px; /* Perfect sizing for mobile/APK viewports */
+}
+
+@media (min-width: 640px) {
+  html {
+    font-size: 18px;
+  }
+}
+
+@media (min-width: 1024px) {
+  html {
+    font-size: 19px;
+  }
 }
 
 /* Force identical font family on all elements, buttons, inputs, selects, textareas, and options */
