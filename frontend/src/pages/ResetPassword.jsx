@@ -103,7 +103,7 @@ const ResetPassword = () => {
           <img 
             src="/logo.png" 
             alt="MCC Logo" 
-            className="w-20 h-20 mx-auto rounded-2xl object-contain bg-white shadow-lg mb-4" 
+            className="w-20 h-20 mx-auto rounded-full object-contain bg-white shadow-lg mb-4" 
           />
 
           {/* Header Title */}

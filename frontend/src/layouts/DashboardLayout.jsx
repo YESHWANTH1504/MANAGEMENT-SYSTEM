@@ -409,7 +409,7 @@ const DashboardLayout = ({ children }) => {
               src="/logo.png" 
               alt="MCC Logo" 
               onClick={() => setPreviewImageUrl('/logo.png')}
-              className="w-12 h-12 rounded-xl object-contain bg-white shadow-md shrink-0 cursor-pointer hover:scale-105 active:scale-95 transition-transform" 
+              className="w-12 h-12 rounded-full object-contain bg-white shadow-md shrink-0 cursor-pointer hover:scale-105 active:scale-95 transition-transform" 
             />
             <span className={`font-extrabold text-2xl text-white dark:text-white tracking-wider transition-all duration-300 ${sidebarCollapsed ? 'opacity-0 w-0 scale-90 pointer-events-none' : 'opacity-100'}`}>MCC</span>
           </div>

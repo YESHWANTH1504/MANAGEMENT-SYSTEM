@@ -129,7 +129,7 @@ const Register = () => {
           <img 
             src="/logo.png" 
             alt="MCC Logo" 
-            className="w-18 h-18 rounded-2xl object-contain bg-white shadow-md shadow-brand-600/10 mb-4 mx-auto" 
+            className="w-18 h-18 rounded-full object-contain bg-white shadow-md shadow-brand-600/10 mb-4 mx-auto" 
           />
           <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Create Workspace Account</h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 font-medium">Self-register for the Internship Management & Monitoring System (IMMS)</p>
