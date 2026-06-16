@@ -306,7 +306,7 @@ const AdminDashboard = () => {
         <div className="h-32 w-full rounded-xl animate-shimmer border border-rose-150/10"></div>
 
         {/* Shimmer KPI Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
           {[1, 2, 3, 4, 5].map((i) => (
             <div key={i} className="h-28 rounded-xl animate-shimmer border border-rose-150/10"></div>
           ))}
@@ -355,7 +355,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* 🚀 METRICS KPI GRID */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
         {kpiOrder.map((key, idx) => {
           if (key === 'total_interns') {
             return (
