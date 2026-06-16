@@ -140,7 +140,7 @@ const AttendanceCalendar = ({ attendanceRecords = [], startDate = null, isLoadin
   return (
     <div className="glass-card p-5 flex flex-col space-y-5 max-w-3xl">
       {/* Calendar Header Navigation */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div className="flex items-center space-x-2.5">
           <div className="p-2 bg-brand-500/10 rounded-xl text-brand-500">
             <Calendar size={18} />
@@ -151,7 +151,7 @@ const AttendanceCalendar = ({ attendanceRecords = [], startDate = null, isLoadin
           </div>
         </div>
 
-        <div className="flex items-center space-x-2 bg-slate-100/50 dark:bg-slate-950/40 border border-slate-200/60 dark:border-white/5 p-1 rounded-xl">
+        <div className="flex items-center space-x-2 bg-slate-100/50 dark:bg-slate-950/40 border border-slate-200/60 dark:border-white/5 p-1 rounded-xl self-start md:self-auto">
           <button 
             onClick={prevMonth}
             className="p-1.5 hover:bg-white dark:hover:bg-slate-900 rounded-lg text-slate-650 dark:text-slate-350 transition-colors"
