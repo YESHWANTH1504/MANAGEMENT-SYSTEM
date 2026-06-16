@@ -68,11 +68,11 @@ def send_reset_password_email(email_to: str, reset_link: str):
         msg.attach(MIMEText(text_content, 'plain'))
         msg.attach(MIMEText(html_content, 'html'))
         
-        # Connect to SMTP server
+        # Connect to SMTP server with a 5-second timeout
         if settings.SMTP_SSL:
-            server = smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT)
+            server = smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT, timeout=5.0)
         else:
-            server = smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT)
+            server = smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=5.0)
             if settings.SMTP_TLS:
                 server.starttls()
                 
