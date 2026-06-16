@@ -125,6 +125,14 @@ const Timeline = () => {
     loadTimelineData();
   }, [id]);
 
+  const getProfilePhotoUrl = (photoName) => {
+    if (!photoName) return '';
+    if (photoName.startsWith('http://') || photoName.startsWith('https://')) return photoName;
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+    const baseUrl = API_URL.replace('/api/v1', '');
+    return `${baseUrl}/static/uploads/${photoName}`;
+  };
+
   // Download PDF portfolio
   const handleDownloadPortfolio = () => {
     if (!profile) return;
@@ -168,9 +176,17 @@ const Timeline = () => {
         <div className="absolute top-0 right-0 w-64 h-64 bg-brand-500/10 blur-3xl pointer-events-none"></div>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative">
           <div className="flex items-center space-x-4">
-            <div className="w-16 h-16 rounded-2xl bg-brand-500 flex items-center justify-center text-white text-2xl font-bold border border-brand-400 shadow shadow-brand-500/20">
-              {(profile.full_name || 'U')[0].toUpperCase()}
-            </div>
+            {profile.profile_photo ? (
+              <img 
+                src={getProfilePhotoUrl(profile.profile_photo)} 
+                alt={profile.full_name} 
+                className="w-16 h-16 rounded-2xl object-cover border border-brand-400 shadow shadow-brand-500/20"
+              />
+            ) : (
+              <div className="w-16 h-16 rounded-2xl bg-brand-500 flex items-center justify-center text-white text-2xl font-bold border border-brand-400 shadow shadow-brand-500/20">
+                {(profile.full_name || 'U')[0].toUpperCase()}
+              </div>
+            )}
             <div>
               <h2 className="text-2xl font-bold tracking-tight">{profile.full_name}</h2>
               <p className="text-sm text-slate-400 mt-1">
