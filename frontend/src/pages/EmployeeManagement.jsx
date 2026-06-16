@@ -24,6 +24,7 @@ const EmployeeManagement = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDept, setSelectedDept] = useState('');
+  const [sortBy, setSortBy] = useState('name');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   
@@ -66,15 +67,28 @@ const EmployeeManagement = () => {
     loadData();
   }, []);
 
-  // Filtered employees list
-  const filteredEmployees = employees.filter(e => {
-    const matchesSearch = e.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          e.employee_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          (e.designation || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          (e.department || '').toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesDept = selectedDept ? e.department === selectedDept : true;
-    return matchesSearch && matchesDept;
-  });
+  // Filtered and sorted employees list
+  const filteredEmployees = [...employees]
+    .filter(e => {
+      const matchesSearch = e.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            e.employee_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            (e.designation || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            (e.department || '').toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesDept = selectedDept ? e.department === selectedDept : true;
+      return matchesSearch && matchesDept;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'name') {
+        return a.full_name.localeCompare(b.full_name);
+      } else if (sortBy === 'id') {
+        return a.employee_id.localeCompare(b.employee_id);
+      } else if (sortBy === 'designation') {
+        return (a.designation || '').localeCompare(b.designation || '');
+      } else if (sortBy === 'date') {
+        return (a.joining_date || '').localeCompare(b.joining_date || '');
+      }
+      return 0;
+    });
 
   // Handle Input Changes
   const handleAddChange = (e) => {
@@ -184,18 +198,30 @@ const EmployeeManagement = () => {
               className="w-full text-xs pl-10 pr-4 py-2.5 bg-slate-100/50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-brand-500 dark:text-white"
             />
           </div>
-          <select
-            value={selectedDept}
-            onChange={(e) => setSelectedDept(e.target.value)}
-            className="text-xs px-3 py-2.5 bg-slate-100/50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-brand-500 dark:text-white w-full md:w-auto"
-          >
-            <option value="">All Departments</option>
-            <option value="Engineering">Engineering</option>
-            <option value="Product">Product Management</option>
-            <option value="Data & Analytics">Data & Analytics</option>
-            <option value="Design">Design / UX</option>
-            <option value="Human Resources">HR / Recruitment</option>
-          </select>
+          <div className="flex items-center gap-2.5 w-full md:w-auto">
+            <select
+              value={selectedDept}
+              onChange={(e) => setSelectedDept(e.target.value)}
+              className="flex-1 md:flex-initial text-xs px-3 py-2.5 bg-slate-100/50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-brand-500 dark:text-white"
+            >
+              <option value="">All Departments</option>
+              <option value="Engineering">Engineering</option>
+              <option value="Product">Product Management</option>
+              <option value="Data & Analytics">Data & Analytics</option>
+              <option value="Design">Design / UX</option>
+              <option value="Human Resources">HR / Recruitment</option>
+            </select>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="flex-1 md:flex-initial text-xs px-3 py-2.5 bg-slate-100/50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-brand-500 dark:text-white"
+            >
+              <option value="name">Sort by Name</option>
+              <option value="id">Sort by ID</option>
+              <option value="designation">Sort by Designation</option>
+              <option value="date">Sort by Joining Date</option>
+            </select>
+          </div>
         </div>
 
         <button
