@@ -20,8 +20,13 @@ const DashboardLayout = ({ children }) => {
   const [paletteSearch, setPaletteSearch] = useState('');
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [previewImageUrl, setPreviewImageUrl] = useState(null);
+  const [profileImageError, setProfileImageError] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    setProfileImageError(false);
+  }, [user]);
 
   const getProfilePhotoUrl = (photoName) => {
     if (!photoName) return '';
@@ -488,20 +493,20 @@ const DashboardLayout = ({ children }) => {
       {/* Main Container */}
       <div className={`flex-1 main-content-transition ${sidebarCollapsed ? 'md:pl-20' : 'md:pl-64'} flex flex-col min-w-0`}>
         {/* TOPBAR */}
-        <header className="h-16 flex items-center justify-between px-6 bg-white/20 dark:bg-brand-900/10 backdrop-blur-md border-b border-white/25 dark:border-white/5 sticky top-0 z-30">
-          <div className="flex items-center space-x-3">
+        <header className="h-16 flex items-center justify-between px-4 sm:px-6 bg-white/20 dark:bg-brand-900/10 backdrop-blur-md border-b border-white/25 dark:border-white/5 sticky top-0 z-30">
+          <div className="flex items-center space-x-2.5 sm:space-x-3 min-w-0">
             <button 
               onClick={() => setSidebarOpen(true)}
-              className="md:hidden text-brand-600 dark:text-white hover:bg-white/20 p-2 rounded-lg"
+              className="md:hidden text-brand-600 dark:text-white hover:bg-white/20 p-2 rounded-lg shrink-0"
             >
               <Menu size={20} />
             </button>
-            <h1 className="font-extrabold text-lg text-brand-600 dark:text-white capitalize">
+            <h1 className="font-extrabold text-base sm:text-lg text-brand-600 dark:text-white capitalize truncate max-w-[140px] sm:max-w-none">
               {location.pathname.replace('/', '').replace('-', ' ') || 'Overview'}
             </h1>
           </div>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4 shrink-0">
             {/* Theme Toggle */}
             <button 
               onClick={toggleTheme}
@@ -524,19 +529,20 @@ const DashboardLayout = ({ children }) => {
             </div>
 
             {/* Profile Detail Badge and Dropdown Menu */}
-            <div className="relative border-l border-white/30 dark:border-white/10 pl-4">
+            <div className="relative border-l border-white/30 dark:border-white/10 pl-2.5 sm:pl-4">
               <button 
                 onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                className="flex items-center space-x-2 focus:outline-none transition-opacity hover:opacity-80"
+                className="flex items-center space-x-1.5 sm:space-x-2 focus:outline-none transition-opacity hover:opacity-80"
               >
                 <span className="text-sm font-semibold text-brand-600 dark:text-white hidden sm:inline-block">
                   {user?.profile?.full_name || user?.email?.split('@')[0] || ''}
                 </span>
-                {user?.profile?.profile_photo ? (
+                {user?.profile?.profile_photo && !profileImageError ? (
                   <img 
                     src={getProfilePhotoUrl(user.profile.profile_photo)} 
                     alt={user.profile.full_name} 
                     className="w-8 h-8 rounded-full object-cover border border-white/40 dark:border-white/25 transition-transform hover:scale-105"
+                    onError={() => setProfileImageError(true)}
                   />
                 ) : (
                   <div className="w-8 h-8 rounded-full bg-white dark:bg-brand-800 flex items-center justify-center text-brand-600 dark:text-white font-bold border border-white/40 dark:border-white/25 transition-transform hover:scale-105">
