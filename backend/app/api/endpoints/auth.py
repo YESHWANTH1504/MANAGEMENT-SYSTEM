@@ -351,8 +351,8 @@ def forgot_password(
     # Generate token
     token = security.create_password_reset_token(user.email)
     
-    # Build simulated reset link
-    reset_link = f"http://localhost:5173/reset-password?token={token}"
+    # Build reset link using config
+    reset_link = f"{settings.FRONTEND_URL}/reset-password?token={token}"
     
     # Send password reset email
     from app.core.email import send_reset_password_email

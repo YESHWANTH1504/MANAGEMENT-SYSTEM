@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     # Defaulting to SQLite for simple local out-of-the-box development, switchable to MySQL in .env
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./imms.db")
     MONGODB_URL: str = os.getenv("MONGODB_URL", "mongodb://localhost:27017")
+    FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:5173")
     
     # File Storage
     UPLOAD_DIR: str = os.getenv("UPLOAD_DIR", "./uploads")
