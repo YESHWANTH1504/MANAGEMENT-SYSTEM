@@ -402,10 +402,10 @@ const InternProfiles = () => {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header Controls */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
         <button
           onClick={() => setSelectedIntern(null)}
-          className="flex items-center space-x-2 text-xs font-bold text-slate-650 hover:text-slate-800 dark:text-slate-350 dark:hover:text-white bg-white/70 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-4 py-2.5 rounded-xl shadow-sm transition-all hover:scale-105 active:scale-95"
+          className="flex items-center justify-center space-x-2 text-xs font-bold text-slate-650 hover:text-slate-800 dark:text-slate-350 dark:hover:text-white bg-white/70 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-4 py-2.5 rounded-xl shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98] w-full sm:w-auto"
         >
           <ArrowLeft size={14} />
           <span>Back to Interns Directory</span>
@@ -413,7 +413,7 @@ const InternProfiles = () => {
 
         <button
           onClick={handleGenerateReport}
-          className="flex items-center space-x-2 text-xs font-bold bg-brand-600 hover:bg-brand-500 text-white px-4 py-2.5 rounded-xl shadow-md transition-all active:translate-y-[0.5px] hover:scale-105 active:scale-95"
+          className="flex items-center justify-center space-x-2 text-xs font-bold bg-brand-600 hover:bg-brand-500 text-white px-4 py-2.5 rounded-xl shadow-md transition-all active:translate-y-[0.5px] hover:scale-[1.02] active:scale-[0.98] w-full sm:w-auto"
         >
           <FileText size={14} />
           <span>Generate Report</span>
