@@ -180,7 +180,7 @@ const ViewUpdates = () => {
         
         <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
           
-          <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto items-stretch sm:items-center flex-1">
+          <div className="flex flex-col md:flex-row gap-3 w-full lg:w-auto items-stretch md:items-center flex-1">
             
             {/* Candidate Selector Dropdown */}
             <div className="relative flex-1">

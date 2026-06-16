@@ -283,8 +283,8 @@ const InternProfiles = () => {
             <h3 className="font-extrabold text-slate-800 dark:text-white text-base">Interns Directory</h3>
             <p className="text-[10px] text-slate-500 mt-0.5">Explore active interns and manage their portfolios and daily logs.</p>
           </div>
-          <div className="flex items-center space-x-2.5">
-            <div className="relative md:w-80">
+          <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 w-full md:w-auto">
+            <div className="relative w-full md:w-80">
               <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 pointer-events-none">
                 <Search size={16} />
               </span>
@@ -299,7 +299,7 @@ const InternProfiles = () => {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="text-xs px-3 py-2.5 bg-white/50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-brand-500 dark:text-white"
+              className="text-xs px-3 py-2.5 bg-white/50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-brand-500 dark:text-white w-full md:w-auto"
             >
               <option value="name">Sort by Name</option>
               <option value="id">Sort by ID</option>
@@ -313,7 +313,7 @@ const InternProfiles = () => {
         {/* Directory Table */}
         <div className="glass-card overflow-hidden shadow-lg">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse min-w-[700px]">
               <thead>
                 <tr className="bg-slate-100/40 dark:bg-slate-900 border-b border-slate-200/50 dark:border-slate-800/80 text-xs font-bold text-slate-500">
                   <th className="px-6 py-4">Intern ID</th>

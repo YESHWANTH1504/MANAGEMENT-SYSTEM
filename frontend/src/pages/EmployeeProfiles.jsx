@@ -266,7 +266,7 @@ const EmployeeProfiles = () => {
             <h3 className="font-extrabold text-slate-800 dark:text-white text-base">Employees Directory</h3>
             <p className="text-[10px] text-slate-500 mt-0.5">Explore full-time employees and manage their biodata, assignments, and daily log posts.</p>
           </div>
-          <div className="relative md:w-80">
+          <div className="relative w-full md:w-80">
             <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 pointer-events-none">
               <Search size={16} />
             </span>
@@ -283,7 +283,7 @@ const EmployeeProfiles = () => {
         {/* Directory Table */}
         <div className="glass-card overflow-hidden shadow-lg">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse min-w-[700px]">
               <thead>
                 <tr className="bg-slate-100/40 dark:bg-slate-900 border-b border-slate-200/50 dark:border-slate-800/80 text-xs font-bold text-slate-500">
                   <th className="px-6 py-4">Employee ID</th>

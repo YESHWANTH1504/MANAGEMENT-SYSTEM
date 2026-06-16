@@ -400,8 +400,7 @@ const DashboardLayout = ({ children }) => {
         </defs>
       </svg>
  
-      {/* SIDEBAR - Desktop & Mobile */}
-      <aside className={`fixed inset-y-0 left-0 z-40 sidebar-transition ${sidebarCollapsed ? 'w-20' : 'w-64'} sidebar-custom bg-brand-600 dark:bg-brand-900 border-r border-brand-700/30 dark:border-white/10 text-white/80 dark:text-white/90 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col`}>
+      <aside className={`fixed inset-y-0 left-0 z-40 sidebar-transition w-64 ${sidebarCollapsed ? 'md:w-20' : 'md:w-64'} sidebar-custom bg-brand-600 dark:bg-brand-900 border-r border-brand-700/30 dark:border-white/10 text-white/80 dark:text-white/90 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col`}>
         {/* Sidebar Header */}
         <div className="h-20 flex items-center justify-center px-4 border-b border-brand-700/40 dark:border-white/10 relative">
           <div className="flex items-center justify-center space-x-3 overflow-hidden">
@@ -411,7 +410,7 @@ const DashboardLayout = ({ children }) => {
               onClick={() => setPreviewImageUrl('/logo.png')}
               className="w-12 h-12 rounded-full object-contain bg-white shadow-md shrink-0 cursor-pointer hover:scale-105 active:scale-95 transition-transform" 
             />
-            <span className={`font-extrabold text-2xl text-white dark:text-white tracking-wider transition-all duration-300 ${sidebarCollapsed ? 'opacity-0 w-0 scale-90 pointer-events-none' : 'opacity-100'}`}>MCC</span>
+            <span className={`font-extrabold text-2xl text-white dark:text-white tracking-wider transition-all duration-300 ${sidebarCollapsed ? 'md:opacity-0 md:w-0 md:scale-90 md:pointer-events-none' : 'opacity-100'}`}>MCC</span>
           </div>
           <button 
             onClick={toggleSidebarCollapse} 
@@ -443,8 +442,8 @@ const DashboardLayout = ({ children }) => {
                 title={sidebarCollapsed ? item.name : ''}
               >
                 <Icon size={18} className={isActive ? 'text-brand-600' : 'text-brand-200'} />
-                <span className={`transition-all duration-300 ${sidebarCollapsed ? 'opacity-0 w-0 scale-90 overflow-hidden pointer-events-none ml-0' : 'opacity-100 ml-3'}`}>{item.name}</span>
-                {isActive && !sidebarCollapsed && <ChevronRight size={14} className="ml-auto text-white/60" />}
+                <span className={`transition-all duration-300 ${sidebarCollapsed ? 'md:opacity-0 md:w-0 md:scale-90 md:overflow-hidden md:pointer-events-none md:ml-0' : 'opacity-100 ml-3'}`}>{item.name}</span>
+                {isActive && <ChevronRight size={14} className={`ml-auto text-white/60 ${sidebarCollapsed ? 'md:hidden' : ''}`} />}
               </Link>
             );
           })}
@@ -466,7 +465,7 @@ const DashboardLayout = ({ children }) => {
                 <UserCircle size={24} />
               )}
             </div>
-            <div className={`overflow-hidden transition-all duration-300 ${sidebarCollapsed ? 'opacity-0 w-0 scale-90 pointer-events-none' : 'opacity-100'}`}>
+            <div className={`overflow-hidden transition-all duration-300 ${sidebarCollapsed ? 'md:opacity-0 md:w-0 md:scale-90 md:pointer-events-none' : 'opacity-100'}`}>
               <p className="text-sm font-bold text-white dark:text-white truncate">{user?.profile?.full_name || user?.email?.split('@')[0] || ''}</p>
               <p className="text-xs text-brand-200/80 dark:text-slate-400 capitalize">{user?.role} Account</p>
             </div>
