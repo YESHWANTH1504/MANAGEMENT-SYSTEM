@@ -227,17 +227,21 @@ const AttendanceCalendar = ({ attendanceRecords = [], startDate = null, isLoadin
           {selectedDay ? (
             <div className="space-y-4 select-text">
               {/* Header Details */}
-              <div className="pb-3.5 border-b border-slate-200/50 dark:border-slate-850/50 flex justify-between items-center">
-                <div>
-                  <span className="text-[9px] uppercase font-bold text-slate-450 block">Audit Date</span>
-                  <span className="text-xs font-bold text-slate-800 dark:text-white">
-                    {new Date(selectedDay.dateStr + "T00:00:00").toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}
-                  </span>
-                </div>
-                <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase ${
+              <div className="pb-3 flex flex-col">
+                <span className="text-[9px] uppercase font-bold text-slate-450 block">Audit Date</span>
+                <span className="text-xs font-bold text-slate-800 dark:text-white block">
+                  {new Date(selectedDay.dateStr + "T00:00:00").toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}
+                </span>
+              </div>
+              
+              <div className="border-b border-slate-200/50 dark:border-slate-850/50"></div>
+
+              {/* Status Badge below the line */}
+              <div className="w-full text-center">
+                <span className={`inline-flex items-center justify-center w-full px-3 py-1.5 rounded-xl text-[10px] font-extrabold uppercase tracking-wider ${
                   selectedDay.record
-                    ? (selectedDay.record.status === 'present' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500')
-                    : (selectedDay.statusText.includes('Absent') ? 'bg-red-500/10 text-red-500' : 'bg-slate-200/50 dark:bg-slate-800 text-slate-650 dark:text-slate-350')
+                    ? (selectedDay.record.status === 'present' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-500 border border-amber-500/20')
+                    : (selectedDay.statusText.includes('Absent') ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 'bg-slate-200/50 dark:bg-slate-800 text-slate-650 dark:text-slate-350 border border-slate-200/10 dark:border-slate-800/50')
                 }`}>
                   {selectedDay.statusText}
                 </span>
