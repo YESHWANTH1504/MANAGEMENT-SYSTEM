@@ -455,11 +455,13 @@ input:focus, textarea:focus, select:focus {
   color: #1c4d5e !important;
   background-color: #ffffff !important;
   border-color: #b6e9fc !important;
+  color-scheme: light !important;
 }
 
 .glass-card select option, .login-glass-card select option, .drawer-custom select option {
   color: #1c4d5e !important;
   background-color: #ffffff !important;
+  color-scheme: light !important;
 }
 
 .glass-card input::placeholder, .login-glass-card input::placeholder {
@@ -678,11 +680,42 @@ input:focus, textarea:focus, select:focus {
   color: #1c4d5e !important;
   background-color: #ffffff !important;
   border-color: #1c4d5e !important;
+  color-scheme: light !important;
 }
 
 .dark .glass-card select option, .dark .login-glass-card select option, .dark .drawer-custom select option {
   color: #1c4d5e !important;
   background-color: #ffffff !important;
+  color-scheme: light !important;
+}
+
+/* Prevent button text/icon color from being overridden by card wildcard selectors in Dark Mode */
+.dark .glass-card button *, 
+.dark .dashboard-card button *, 
+.dark .login-glass-card button *, 
+.dark .drawer-custom button *,
+.dark .welcome-hero-banner button * {
+  color: inherit !important;
+}
+
+/* Global color scheme override for native inputs/dropdowns outside of cards in Dark Mode */
+.dark select,
+.dark input,
+.dark textarea {
+  color-scheme: dark !important;
+}
+
+.dark select option {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+}
+
+/* Specific status badge overrides inside cards in Dark Mode */
+.dark .glass-card .status-badge-active,
+.dark .glass-card .status-badge-inactive,
+.dark .dashboard-card .status-badge-active,
+.dark .dashboard-card .status-badge-inactive {
+  color: #ffffff !important;
 }
 
 .dark .glass-card input::placeholder, .dark .login-glass-card input::placeholder {
