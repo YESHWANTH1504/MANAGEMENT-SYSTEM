@@ -108,11 +108,11 @@ const ResetPassword = () => {
 
           {/* Header Title */}
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">
-              Reset Password
-            </h1>
-            <p className="text-sm text-slate-500 mt-2">
+            <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
               Tekquora
+            </h1>
+            <p className="text-sm text-slate-500 mt-2 font-medium">
+              Reset Password
             </p>
           </div>
 

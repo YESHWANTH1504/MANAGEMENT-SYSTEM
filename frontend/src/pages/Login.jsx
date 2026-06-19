@@ -101,11 +101,11 @@ const Login = () => {
             alt="Tekquora Logo" 
             className="w-20 h-20 mx-auto rounded-full object-contain bg-white shadow-lg mb-4" 
           />
-          <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">
-            {isForgotPassword ? 'Reset Password' : 'Sign in to your account'}
-          </h1>
-          <p className="text-sm text-slate-500 mt-2">
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
             Tekquora
+          </h1>
+          <p className="text-sm text-slate-500 mt-2 font-medium">
+            {isForgotPassword ? 'Reset Password' : 'Sign in to your account'}
           </p>
         </div>
 
