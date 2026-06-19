@@ -112,7 +112,7 @@ const ResetPassword = () => {
               Reset Password
             </h1>
             <p className="text-sm text-slate-500 mt-2">
-              Tekquora Management System
+              Tekquora
             </p>
           </div>
 
