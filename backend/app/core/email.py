@@ -13,14 +13,14 @@ def send_reset_password_email(email_to: str, reset_link: str):
     """
     subject = "IMMS Password Reset Link"
     
-    # HTML body with MCC ADM branding matching the visual guidelines
+    # HTML body with Tekquora branding matching the visual guidelines
     html_content = f"""
     <html>
         <body style="font-family: 'Segoe UI', Arial, sans-serif; background-color: #b6e9fc; padding: 30px; color: #1c4d5e; margin: 0;">
             <div style="max-width: 600px; margin: 0 auto; background: #ffffff; padding: 40px; border-radius: 24px; border: 1px solid rgba(28, 77, 94, 0.15); box-shadow: 0 10px 30px rgba(28, 77, 94, 0.1);">
                 <div style="text-align: center; border-bottom: 2px solid rgba(28, 77, 94, 0.1); padding-bottom: 25px; margin-bottom: 25px;">
-                    <h2 style="color: #1c4d5e; margin: 0; font-size: 26px; font-weight: 800; tracking-wide: 0.5px;">MCC ADMIN</h2>
-                    <p style="color: #1ca4c8; margin: 5px 0 0 0; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px;">Innovation Park Management System</p>
+                    <h2 style="color: #1c4d5e; margin: 0; font-size: 26px; font-weight: 800; tracking-wide: 0.5px;">Tekquora ADMIN</h2>
+                    <p style="color: #1ca4c8; margin: 5px 0 0 0; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px;">Management System</p>
                 </div>
                 <div>
                     <h3 style="color: #1c4d5e; margin-top: 0; font-size: 20px; font-weight: 700;">Password Reset Request</h3>

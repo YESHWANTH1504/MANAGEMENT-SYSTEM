@@ -102,7 +102,7 @@ const ResetPassword = () => {
           {/* Centered Brand Logo */}
           <img 
             src="/logo.png" 
-            alt="MCC Logo" 
+            alt="Tekquora Logo" 
             className="w-20 h-20 mx-auto rounded-full object-contain bg-white shadow-lg mb-4" 
           />
 
@@ -112,7 +112,7 @@ const ResetPassword = () => {
               Reset Password
             </h1>
             <p className="text-sm text-slate-500 mt-2">
-              MCC MRF Innovation Park Management System
+              Tekquora Management System
             </p>
           </div>
 

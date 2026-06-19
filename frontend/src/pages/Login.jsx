@@ -98,14 +98,14 @@ const Login = () => {
         <div className="mb-8 text-center">
           <img 
             src="/logo.png" 
-            alt="MCC Logo" 
+            alt="Tekquora Logo" 
             className="w-20 h-20 mx-auto rounded-full object-contain bg-white shadow-lg mb-4" 
           />
           <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">
             {isForgotPassword ? 'Reset Password' : 'Sign in to your account'}
           </h1>
           <p className="text-sm text-slate-500 mt-2">
-            MCC MRF Innovation Park Management System
+            Tekquora Management System
           </p>
         </div>
 

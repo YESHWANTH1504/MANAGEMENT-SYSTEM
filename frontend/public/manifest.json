@@ -1,7 +1,7 @@
 {
-  "short_name": "MCC IMMS",
-  "name": "MCC MRF Innovation Park Management System",
-  "description": "Madras Christian College MRF Innovation Park Management System for interns and employees.",
+  "short_name": "Tekquora IMMS",
+  "name": "Tekquora Management System",
+  "description": "Tekquora Management System for interns and employees.",
   "icons": [
     {
       "src": "/icon-192.png",
