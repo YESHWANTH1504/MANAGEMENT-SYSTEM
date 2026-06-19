@@ -406,11 +406,11 @@ const DashboardLayout = ({ children }) => {
           <div className="flex items-center justify-center space-x-3 overflow-hidden">
             <img 
               src="/logo.png" 
-              alt="Tekquora Logo" 
+              alt="MCC Logo" 
               onClick={() => setPreviewImageUrl('/logo.png')}
               className="w-12 h-12 rounded-full object-contain bg-white shadow-md shrink-0 cursor-pointer hover:scale-105 active:scale-95 transition-transform" 
             />
-            <span className={`font-extrabold text-2xl text-white dark:text-white tracking-wider transition-all duration-300 ${sidebarCollapsed ? 'md:opacity-0 md:w-0 md:scale-90 md:pointer-events-none' : 'opacity-100'}`}>Tekquora</span>
+            <span className={`font-extrabold text-2xl text-white dark:text-white tracking-wider transition-all duration-300 ${sidebarCollapsed ? 'md:opacity-0 md:w-0 md:scale-90 md:pointer-events-none' : 'opacity-100'}`}>MCC</span>
           </div>
           <button 
             onClick={toggleSidebarCollapse} 

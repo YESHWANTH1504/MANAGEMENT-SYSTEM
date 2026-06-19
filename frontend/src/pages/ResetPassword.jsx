@@ -102,14 +102,14 @@ const ResetPassword = () => {
           {/* Centered Brand Logo */}
           <img 
             src="/logo.png" 
-            alt="Tekquora Logo" 
+            alt="MCC Logo" 
             className="w-20 h-20 mx-auto rounded-full object-contain bg-white shadow-lg mb-4" 
           />
 
           {/* Header Title */}
           <div className="text-center mb-8">
             <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-              Tekquora
+              MCC
             </h1>
             <p className="text-sm text-slate-500 mt-2 font-medium">
               Reset Password

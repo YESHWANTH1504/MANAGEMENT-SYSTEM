@@ -128,7 +128,7 @@ const Register = () => {
         <div className="text-center mb-6">
           <img 
             src="/logo.png" 
-            alt="Tekquora Logo" 
+            alt="MCC Logo" 
             className="w-18 h-18 rounded-full object-contain bg-white shadow-md shadow-brand-600/10 mb-4 mx-auto" 
           />
           <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Create Workspace Account</h2>

@@ -1,7 +1,7 @@
 {
-  "short_name": "Tekquora",
-  "name": "Tekquora",
-  "description": "Tekquora for interns and employees.",
+  "short_name": "MCC",
+  "name": "MCC",
+  "description": "MCC for interns and employees.",
   "icons": [
     {
       "src": "/icon-192.png",
